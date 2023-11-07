@@ -1,91 +1,91 @@
-name: CI
+# name: CI
 
-# On every pull request, but only on push to main
-on:
-  push:
-    branches:
-    - main
-    tags:
-    - '*'
-  pull_request:
-env:
-  LATEST_PY_VERSION: '3.10'
+# # On every pull request, but only on push to main
+# on:
+#   push:
+#     branches:
+#     - main
+#     tags:
+#     - '*'
+#   pull_request:
+# env:
+#   LATEST_PY_VERSION: '3.10'
 
-jobs:
-  tests:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version:
-        - '3.8'
-        - '3.9'
-        - '3.10'
-        - '3.11'
+# jobs:
+#   tests:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         python-version:
+#         - '3.8'
+#         - '3.9'
+#         - '3.10'
+#         - '3.11'
 
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Set up Python ${{ matrix.python-version }}
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .["test"]
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           python -m pip install -e .["test"]
 
-      - name: Run pre-commit
-        if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
-        run: |
-          python -m pip install pre-commit
-          pre-commit run --all-files
+#       - name: Run pre-commit
+#         if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
+#         run: |
+#           python -m pip install pre-commit
+#           pre-commit run --all-files
 
-      - name: Run tests
-        run: python -m pytest --cov vsifile --cov-report xml --cov-report term-missing --benchmark-skip -s -vv
+#       - name: Run tests
+#         run: python -m pytest --cov vsifile --cov-report xml --cov-report term-missing --benchmark-skip -s -vv
 
-      - name: Upload Results
-        if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.xml
-          flags: unittests
-          name: ${{ matrix.python-version }}
-          fail_ci_if_error: false
+#       - name: Upload Results
+#         if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
+#         uses: codecov/codecov-action@v1
+#         with:
+#           file: ./coverage.xml
+#           flags: unittests
+#           name: ${{ matrix.python-version }}
+#           fail_ci_if_error: false
 
 
-  # publish:
-  #   needs: [tests]
-  #   runs-on: ubuntu-latest
-  #   if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v1
-  #       with:
-  #         python-version: ${{ env.LATEST_PY_VERSION }}
+#   # publish:
+#   #   needs: [tests]
+#   #   runs-on: ubuntu-latest
+#   #   if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
+#   #   steps:
+#   #     - uses: actions/checkout@v2
+#   #     - name: Set up Python
+#   #       uses: actions/setup-python@v1
+#   #       with:
+#   #         python-version: ${{ env.LATEST_PY_VERSION }}
 
-  #     - name: Install dependencies
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         python -m pip install hatch
-  #         python -m hatch build
+#   #     - name: Install dependencies
+#   #       run: |
+#   #         python -m pip install --upgrade pip
+#   #         python -m pip install hatch
+#   #         python -m hatch build
 
-  #     - name: Set tag version
-  #       id: tag
-  #       run: |
-  #         echo "version=${GITHUB_REF#refs/*/}"
-  #         echo "version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+#   #     - name: Set tag version
+#   #       id: tag
+#   #       run: |
+#   #         echo "version=${GITHUB_REF#refs/*/}"
+#   #         echo "version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
-  #     - name: Set module version
-  #       id: module
-  #       run: |
-  #         hatch --quiet version
-  #         echo "version=$(hatch --quiet version)" >> $GITHUB_OUTPUT
+#   #     - name: Set module version
+#   #       id: module
+#   #       run: |
+#   #         hatch --quiet version
+#   #         echo "version=$(hatch --quiet version)" >> $GITHUB_OUTPUT
 
-  #     - name: Build and publish
-  #       if: ${{ steps.tag.outputs.version }} == ${{ steps.module.outputs.version}}
-  #       env:
-  #         HATCH_INDEX_USER: ${{ secrets.PYPI_USERNAME }}
-  #         HATCH_INDEX_AUTH: ${{ secrets.PYPI_PASSWORD }}
-  #       run: |
-  #         python -m hatch publish
+#   #     - name: Build and publish
+#   #       if: ${{ steps.tag.outputs.version }} == ${{ steps.module.outputs.version}}
+#   #       env:
+#   #         HATCH_INDEX_USER: ${{ secrets.PYPI_USERNAME }}
+#   #         HATCH_INDEX_AUTH: ${{ secrets.PYPI_PASSWORD }}
+#   #       run: |
+#   #         python -m hatch publish

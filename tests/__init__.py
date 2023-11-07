@@ -1,1 +1,1 @@
-"""rio-tiler tests suite."""
+"""vsifile tests suite."""

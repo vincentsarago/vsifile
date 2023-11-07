@@ -30,9 +30,8 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "pytest",
-    "pytest-asyncio",
-    "pytest-benchmark",
     "pytest-cov",
+    "rasterio",
 ]
 dev = [
     "pre-commit",

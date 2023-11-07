@@ -45,10 +45,6 @@ By default the cache will be cleaned up when closing the file handle, you can ch
 
 See [CONTRIBUTING.md](https://github.com/vincentsarago/vsifile/blob/main/CONTRIBUTING.md)
 
-## Authors
-
-See [AUTHORS.txt](https://github.com/vincentsarago/vsifile/blob/main/AUTHORS.txt) for a listing of individual contributors.
-
 ## Changes
 
 See [CHANGES.md](https://github.com/vincentsarago/vsifile/blob/main/CHANGES.md).

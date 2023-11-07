@@ -23,24 +23,3 @@ This repo is set to use `pre-commit` to run *isort*, *flake8*, *pydocstring*, *b
 ```bash
 $ pre-commit install
 ```
-
-### Docs
-
-```bash
-$ git clone https://github.com/vincentsarago/vsifile.git
-$ cd rio-tiler
-$ pip install -e .["docs"]
-```
-
-Hot-reloading docs:
-
-```bash
-$ mkdocs serve
-```
-
-To manually deploy docs (note you should never need to do this because Github
-Actions deploys automatically for new commits.):
-
-```bash
-$ mkdocs gh-deploy -f docs/mkdocs.yml
-```

@@ -19,7 +19,7 @@ class FileReader:
 
     def __post_init__(self):
         """Setupg cache."""
-        logger.info(f"Using {cache_settings.directory} Cache directory")
+        logger.debug(f"Using {cache_settings.directory} Cache directory")
         self._cache = Cache(
             directory=cache_settings.directory,
             size_limit=cache_settings.headers_maxsize,
@@ -31,7 +31,7 @@ class FileReader:
 
     def __enter__(self):
         """Open file and fetch header."""
-        logger.info(f"Opening: {self.name} (mode: {self.mode})")
+        logger.debug(f"Opening: {self.name} (mode: {self.mode})")
         self.file = open(self.name, self.mode)
         self._header = self._get_header()
         return self
@@ -39,7 +39,7 @@ class FileReader:
     def _get_header(self):
         header = self._cache.get(f"{self.name}-header", read=True)
         if not header:
-            logger.info("Adding Header in cache")
+            logger.debug("Adding Header in cache")
             header = self._read(cache_settings.header_size)
             self.seek(0)
             self._cache.set(
@@ -102,12 +102,12 @@ class FileReader:
         # TODO: maybe check if gdal is trying to make a bigger header request?
         loc = self.tell()
         if loc + length <= len(self._header):
-            logger.info(f"Reading {loc}->{loc+length} from Header cache")
+            logger.debug(f"Reading {loc}->{loc+length} from Header cache")
             self.seek(loc + length, 0)
             return self._header[loc : loc + length]
 
         return self._read(length)
 
     def _read(self, length: int = -1):
-        logger.info(f"Fetching {self.tell()}->{self.tell() + length}")
+        logger.debug(f"Fetching {self.tell()}->{self.tell() + length}")
         return self.file.read(length)

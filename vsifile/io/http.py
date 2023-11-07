@@ -24,7 +24,7 @@ class HttpReader:
 
     def __post_init__(self):
         """Setupg cache."""
-        logger.info(f"Using {cache_settings.directory} Cache directory")
+        logger.debug(f"Using {cache_settings.directory} Cache directory")
         self._cache = Cache(
             directory=cache_settings.directory,
             size_limit=cache_settings.headers_maxsize,
@@ -36,7 +36,7 @@ class HttpReader:
 
     def __enter__(self):
         """Open file and fetch header."""
-        logger.info(f"Opening: {self.name} (mode: {self.mode})")
+        logger.debug(f"Opening: {self.name} (mode: {self.mode})")
         head = self._client.head(self.name)
         assert head.status_code == 200
         assert head.headers.get("accept-ranges") == "bytes"
@@ -48,7 +48,7 @@ class HttpReader:
     def _get_header(self):
         header = self._cache.get(f"{self.name}-header", read=True)
         if not header:
-            logger.info("Adding Header in cache")
+            logger.debug("Adding Header in cache")
             header = self._read(cache_settings.header_size)
             self.seek(0)
             self._cache.set(
@@ -128,13 +128,13 @@ class HttpReader:
         loc = self.tell()
         if loc + length <= len(self._header):
             self.seek(loc + length, 0)
-            logger.info(f"Reading {loc}->{loc+length} from Header cache")
+            logger.debug(f"Reading {loc}->{loc+length} from Header cache")
             return self._header[loc : loc + length]
 
         return self._read(length)
 
     def _read(self, length: int):
-        logger.info(f"Fetching {self.tell()}->{self.tell() + length}")
+        logger.debug(f"Fetching {self.tell()}->{self.tell() + length}")
         headers = {"Range": f"bytes={self._loc}-{self._loc + length - 1}"}
         response = self._client.get(self.name, headers=headers)
         response.raise_for_status()

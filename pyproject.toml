@@ -20,6 +20,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+    "diskcache",
     "cachetools",
     "httpx",
     "pydantic",

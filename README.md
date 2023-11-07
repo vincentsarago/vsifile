@@ -23,6 +23,8 @@ ref: https://github.com/rasterio/rasterio/blob/d966440c06f3324aca1fa761d490cc780
 ---
 
 
+## Description
+
 ### Usage
 
 ```python
@@ -33,7 +35,11 @@ with rasterio.open("tests/fixtures/cog.tif",  opener=VSIFile) as src:
     ...
 ```
 
-## Description
+### Cache Configuration
+
+*vsifile* uses [DiskCache](https://grantjenks.com/docs/diskcache/) to create a **persistent** File Header cache.
+By default the cache will be cleaned up when closing the file handle, you can change this behaviour by setting `VSIFILE_CACHE_DIRECTORY="{your temp directory}"` environment variable.
+
 
 ## Contribution & Development
 

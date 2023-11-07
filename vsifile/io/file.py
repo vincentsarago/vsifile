@@ -25,6 +25,10 @@ class FileReader:
             size_limit=cache_settings.headers_maxsize,
         )
 
+    def __repr__(self) -> str:
+        """Reader repr."""
+        return f"VSIFILE({self.name})"
+
     def __hash__(self):
         """Object hash."""
         return hash((self.name, self.mode))

@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 
 from .file import FileReader
 from .http import HttpReader
+from .s3 import AWSS3Reader
 
 
 def VSIFile(uri: str, mode: str):
@@ -18,6 +19,10 @@ def VSIFile(uri: str, mode: str):
     # - add s3
     # - add az
     # - add gs
+
+    # s3://{bucket}/{key}
+    elif parsed.scheme == "s3":
+        return AWSS3Reader(uri, mode)
 
     # file:///{path}
     elif parsed.scheme == "file":

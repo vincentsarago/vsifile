@@ -6,35 +6,36 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
-class CacheSettings(BaseSettings):
+class VSISettings(BaseSettings):
     """Cache settings"""
 
     # Diskcache Headers settings
-    headers_ttl: int = 300  # in seconds
-    headers_maxsize: int = 5120000000  # in bytes
-    directory: Optional[str] = None
+    cache_headers_ttl: int = 300  # in seconds
+    cache_headers_maxsize: int = 5120000000  # in bytes
+    cache_directory: Optional[str] = None
 
     # LRU Blocks cache
-    blocks_ttl: int = 300  # in seconds
-    blocks_maxsize: int = 512  # in Mbytes ?
+    cache_blocks_ttl: int = 300  # in seconds
+    cache_blocks_maxsize: int = 512  # in Mbytes ?
 
     # Whether or not caching is enabled
-    disable: bool = False
+    cache_disable: bool = False
 
-    header_size: int = 32768
+    # equivalent of GDAL_INGESTED_BYTES_AT_OPEN
+    ingested_bytes_at_open: int = 32768
 
-    model_config = {"env_prefix": "VSIFILE_CACHE_", "env_file": ".env"}
+    model_config = {"env_prefix": "VSIFILE_", "env_file": ".env"}
 
     @model_validator(mode="after")
     def check_enable(self):
         """Check if cache is disabled."""
-        if self.disable:
-            self.headers_ttl = 0
-            self.headers_maxsize = 0
-            self.blocks_ttl = 0
-            self.blocks_maxsize = 0
+        if self.cache_disable:
+            self.cache_headers_ttl = 0
+            self.cache_headers_maxsize = 0
+            self.cache_blocks_ttl = 0
+            self.cache_blocks_maxsize = 0
 
         return self
 
 
-cache_settings = CacheSettings()
+vsi_settings = VSISettings()

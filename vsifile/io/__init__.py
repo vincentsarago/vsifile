@@ -26,7 +26,7 @@ def VSIFile(uri: str, mode: str):
 
     # file:///{path}
     elif parsed.scheme == "file":
-        return FileReader(uri, mode)
+        return FileReader(uri.replace("file://", ""), mode)
 
     # Invalid Scheme
     elif parsed.scheme:

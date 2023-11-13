@@ -101,7 +101,7 @@ class AWSS3Reader(BaseReader):
         # discard header cache ?
         self.last_modified = head["LastModified"]
 
-        self._size = head.get("ContentLength") or 0
+        self._size = int(head.get("ContentLength")) or 0
         self._header = self._get_header()
         return self
 

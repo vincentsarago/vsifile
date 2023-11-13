@@ -42,6 +42,12 @@ def test_vsifile_file():
         assert f.tell() == 40100
         assert b_cache == b
 
+        b = f.read_multi_range(2, [100, 200], [10, 20])
+        assert len(b) == 2
+        assert len(b[0]) == 10
+        assert len(b[1]) == 20
+        assert f.tell() == 220
+
     assert f.closed
 
     with VSIFile(f"file://{cog}", "rb") as f:

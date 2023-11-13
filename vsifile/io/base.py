@@ -2,6 +2,7 @@
 
 import abc
 from dataclasses import dataclass
+from typing import List
 
 from cachetools import TTLCache, cached
 from cachetools.keys import hashkey
@@ -131,19 +132,19 @@ class BaseReader(metaclass=abc.ABCMeta):
     def _cached_read(self, length: int = -1) -> bytes:
         return self._read(length)
 
-    # # Not Yet in Rasterio
-    # # see: https://github.com/rasterio/rasterio/pull/2898#issuecomment-1803743898
-    # def read_multi_range(
-    #     self,
-    #     nranges: int,
-    #     offsets: List[int],
-    #     sizes: List[int],
-    # ) -> List[bytes]:
-    #     """Read multiple ranges."""
-    #     return [
-    #         self._read_range(offset, size) for (offset, size) in zip(offsets, sizes)
-    #     ]
+    # Not Yet in Rasterio
+    # see: https://github.com/rasterio/rasterio/pull/2898#issuecomment-1803743898
+    def read_multi_range(
+        self,
+        nranges: int,
+        offsets: List[int],
+        sizes: List[int],
+    ) -> List[bytes]:
+        """Read multiple ranges."""
+        return [
+            self._read_range(offset, size) for (offset, size) in zip(offsets, sizes)
+        ]
 
-    # def _read_range(self, offset, size) -> bytes:
-    #     _ = self.seek(offset)
-    #     return self.read(size)
+    def _read_range(self, offset, size) -> bytes:
+        _ = self.seek(offset)
+        return self.read(size)

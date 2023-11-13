@@ -41,7 +41,7 @@ class HttpReader(BaseReader):
         assert head.status_code == 200
         assert head.headers.get("accept-ranges") == "bytes"
 
-        self._size = head.headers.get("content-length") or 0
+        self._size = int(head.headers.get("content-length")) or 0
         self._header = self._get_header()
         return self
 

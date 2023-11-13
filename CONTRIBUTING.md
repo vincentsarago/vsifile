@@ -13,7 +13,7 @@ $ pip install -e .["dev"]
 You can then run the tests with the following command:
 
 ```sh
-python -m pytest --cov vsifile --cov-report term-missing --benchmark-skip
+python -m pytest --cov vsifile --cov-report term-missing -s -vv
 ```
 
 ### pre-commit

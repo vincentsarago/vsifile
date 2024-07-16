@@ -21,6 +21,7 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "diskcache",
+    "attrs",
     "cachetools",
     "httpx",
     "pydantic",
@@ -38,6 +39,7 @@ s3 = [
 ]
 dev = [
     "pre-commit",
+    "rasterio~=1.4a3",
 ]
 
 

@@ -16,7 +16,7 @@ class VSISettings(BaseSettings):
 
     # LRU Blocks cache
     cache_blocks_ttl: int = 300  # in seconds
-    cache_blocks_maxsize: int = 512  # in Mbytes ?
+    cache_blocks_maxsize: int = 512  # in number of entries
 
     # Whether or not caching is enabled
     cache_disable: bool = False

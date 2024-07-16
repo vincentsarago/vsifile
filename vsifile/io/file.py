@@ -1,14 +1,19 @@
 """File VSIFile reader"""
 
-from dataclasses import dataclass
+import io
+from typing import Union
+
+from attrs import define, field
 
 from vsifile.io.base import BaseReader
 from vsifile.logger import logger
 
 
-@dataclass
+@define
 class FileReader(BaseReader):
     """Local File VSIFILE Reader."""
+
+    file: Union[io.TextIOBase, io.RawIOBase, io.BufferedIOBase] = field(init=False)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -21,19 +26,19 @@ class FileReader(BaseReader):
     def __enter__(self):
         """Open file and fetch header."""
         logger.debug(f"Opening: {self.name} (mode: {self.mode})")
-        self.file = open(self.name, self.mode)
-        self._header = self._get_header()
+        name = self.name.replace("file://", "")
+        self.file = io.open(name, self.mode)
+        self._get_header()
         return self
 
     def close(self):
         """Close."""
-        self._cache.close()
+        self.cache.close()
         self.file.close()
 
-    @property
     def seekable(self) -> bool:
         """file seekable."""
-        return self.file.seekable
+        return self.file.seekable()
 
     @property
     def closed(self) -> bool:
@@ -48,7 +53,7 @@ class FileReader(BaseReader):
         """Return stream position."""
         return self.file.tell()
 
-    def _read(self, length: int = -1) -> bytes:
+    def _read(self, length: int = -1) -> Union[str, bytes]:
         """Low level read method."""
         logger.debug(f"Fetching {self.tell()}->{self.tell() + length}")
         return self.file.read(length)

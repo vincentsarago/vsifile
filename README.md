@@ -1,5 +1,13 @@
 # vsifile
 
+---
+
+**Source Code**: https://github.com/vincentsarago/vsifile
+
+---
+
+## Description
+
 Experiment using Rasterio/GDAL **Python file opener VSI plugin** https://github.com/rasterio/rasterio/pull/2898/files
 
 Future version of rasterio will accept an custom dataset `opener`:
@@ -16,22 +24,76 @@ opener : callable, optional
 ref: https://github.com/rasterio/rasterio/blob/d966440c06f3324aca1fa761d490cc780a9f619c/rasterio/__init__.py#L185-L191
 
 
----
+## Install
 
-**Source Code**: https://github.com/vincentsarago/vsifile
+You can install `vsifile` using pip
 
----
+```bash
+python -m pip install -U pip
+python -m pip install -U vsifile
+```
 
+or install from source:
 
-## Description
+```bash
+git clone https://github.com/vincentsarago/vsifile.git
+cd vsifile
+python -m pip install -U pip
+python -m pip install -e .
+```
 
-### Usage
+## Usage
+
+```python
+from vsifile import VSIFile, FileReader
+
+src_path = "tests/fixture.cog.tif"
+
+with VSIFile(src_path, "rb") as f:
+    assert isinstance(f, FileReader)
+    assert hash(f)
+    assert "FileReader" in str(f)
+
+    assert not f.closed
+    assert f._cache
+    assert len(f._header) == 32768
+    assert f.tell() == 0
+    assert f.seekable
+
+    b = f.read(100)
+    assert len(b) == 100
+    assert f._header[0:100] == b
+    assert f.tell() == 100
+
+    _ = f.seek(0)
+    assert f.tell() == 0
+
+    _ = f.seek(40000)
+    assert f.tell() == 40000
+
+    b = f.read(100)
+    assert f.tell() == 40100
+
+    # fetch the same block (should be from LRU cache)
+    _ = f.seek(40000)
+    b_cache = f.read(100)
+    assert f.tell() == 40100
+    assert b_cache == b
+
+    b = f.read_multi_range(2, [100, 200], [10, 20])
+    assert len(b) == 2
+    assert len(b[0]) == 10
+    assert len(b[1]) == 20
+    assert f.tell() == 220
+```
+
+#### With Rasterio
 
 ```python
 import rasterio
-from vsifile import VSIFile
+from vsifile.rasterio import opener
 
-with rasterio.open("tests/fixtures/cog.tif",  opener=VSIFile) as src:
+with rasterio.open("tests/fixtures/cog.tif",  opener=opener) as src:
     ...
 ```
 

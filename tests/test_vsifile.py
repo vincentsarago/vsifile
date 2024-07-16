@@ -2,6 +2,8 @@
 
 import os
 
+import pytest
+
 from vsifile import VSIFile
 from vsifile.io import FileReader
 
@@ -11,20 +13,28 @@ cog = os.path.join(fixtures_dir, "cog.tif")
 
 def test_vsifile_file():
     """Test VSIFile Local File reader."""
+    with pytest.raises(ValueError):
+        with VSIFile(cog, "r") as f:
+            pass
+
+    with pytest.raises(ValueError):
+        with VSIFile(cog, "w") as f:
+            pass
+
     with VSIFile(cog, "rb") as f:
         assert isinstance(f, FileReader)
         assert hash(f)
         assert "FileReader" in str(f)
 
         assert not f.closed
-        assert f._cache
-        assert len(f._header) == 32768
+        assert f.cache
+        assert len(f.header) == 32768
         assert f.tell() == 0
         assert f.seekable
 
         b = f.read(100)
         assert len(b) == 100
-        assert f._header[0:100] == b
+        assert f.header[0:100] == b
         assert f.tell() == 100
 
         _ = f.seek(0)

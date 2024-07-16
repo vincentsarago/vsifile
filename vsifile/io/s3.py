@@ -1,9 +1,10 @@
 """HTTP VSIFile reader"""
 
 import os
-from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional, Union
 from urllib.parse import urlparse
+
+from attrs import define, field
 
 from vsifile.io.base import BaseReader
 from vsifile.logger import logger
@@ -16,23 +17,21 @@ except ImportError:  # pragma: nocover
     ClientError = None  # type: ignore
 
 
-@dataclass
+@define
 class AWSS3Reader(BaseReader):
     """S3 VSIFILE Reader."""
 
-    name: str
-    mode: str = "rb"
+    requester_pays: bool = field(
+        factory=lambda: os.environ.get("AWS_REQUEST_PAYER", "").lower() == "requester"
+    )
+    client: Optional[Any] = field(default=None)
 
-    _loc: int = 0
-    _size: int = 0
-    _header: bytes = None
+    bucket: str = field(init=False, default=None)
+    key: str = field(init=False, default=None)
 
-    _closed: bool = False
-
-    client: Any = None
-    bucket: str = None
-    key: str = None
-    _requester_pays: bool = False
+    loc: int = field(default=0, init=False)
+    file_size: int = field(default=0, init=False)
+    is_closed: bool = field(default=False, init=False)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -42,15 +41,9 @@ class AWSS3Reader(BaseReader):
         """Object hash."""
         return hash((self.name, self.mode))
 
-    def __post_init__(self):
-        """Setupg cache."""
-        super().__post_init__()
-
+    def __attrs_post_init__(self):
+        """Setup Boto3 Client."""
         assert boto3_session is not None, "'boto3' must be installed to use AWSS3Reader"
-
-        self._requester_pays = (
-            os.environ.get("AWS_REQUEST_PAYER", "").lower() == "requester"
-        )
 
         if not self.client:
             if profile_name := os.environ.get("AWS_PROFILE", None):
@@ -99,24 +92,24 @@ class AWSS3Reader(BaseReader):
         assert head.get("AcceptRanges") == "bytes"
 
         # discard header cache ?
-        self.last_modified = head["LastModified"]
+        # last_modified = head["LastModified"]
 
-        self._size = int(head.get("ContentLength")) or 0
-        self._header = self._get_header()
+        self.file_size = int(head.get("ContentLength")) or 0
+        self._get_header()
+
         return self
 
     def close(self):
         """Close."""
-        self._cache.close()
+        self.cache.close()
         self.client.close()
-        self._closed = True
+        self.is_closed = True
 
     @property
     def closed(self) -> bool:
         """Closed?"""
-        return self._closed
+        return self.is_closed
 
-    @property
     def seekable(self) -> bool:
         """seekable stream."""
         return True
@@ -124,39 +117,44 @@ class AWSS3Reader(BaseReader):
     def seek(self, loc: int, whence: int = 0) -> int:
         """Change stream position."""
         if whence == 0:
-            self._loc = loc
+            self.loc = loc
 
         elif whence == 1:
-            self._loc += loc
+            self.loc += loc
 
         elif whence == 2:
-            if not self._size:
+            if not self.size:
                 raise ValueError(
                     "Cannot use end of stream because we don't know the size of the stream"
                 )
-            self._loc = self._size + loc
+            self.loc = self.size + loc
 
         else:
             raise ValueError(f"Invalid Whence value: {whence}")
 
-        return self._loc
+        return self.loc
 
     def tell(self) -> int:
         """Return stream position."""
-        return self._loc
+        return self.loc
 
-    def _read(self, length: int = -1) -> bytes:
+    @property
+    def size(self) -> int:
+        """return file size."""
+        return self.file_size
+
+    def _read(self, length: int = -1) -> Union[str, bytes]:
         """Low level read method."""
         logger.debug(f"Fetching {self.tell()}->{self.tell() + length}")
 
         params = {
             "Bucket": self.bucket,
             "Key": self.key,
-            "Range": f"bytes={self._loc}-{self._loc + length - 1}",
+            "Range": f"bytes={self.loc}-{self.loc + length - 1}",
         }
-        if self._requester_pays:
+        if self.requester_pays:
             params["RequestPayer"] = "requester"
 
         response = self.client.get_object(**params)
-        _ = self.seek(self._loc + length, 0)
+        _ = self.seek(self.loc + length, 0)
         return response["Body"].read()

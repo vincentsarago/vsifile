@@ -2,12 +2,12 @@
 
 from typing import List
 
-from rasterio._vsiopener import _AbstractOpener
+from rasterio.abc import MultiByteRangeResourceContainer
 
 from vsifile import BaseReader, VSIFile
 
 
-class VSIOpener(_AbstractOpener):
+class VSIOpener:
     """VSIOpener compatible with rasterio's vsiopener.
 
     Example:
@@ -47,9 +47,7 @@ class VSIOpener(_AbstractOpener):
         with self._obj(path) as f:
             return f.size()
 
-    def read_multi_range(self) -> bool:
-        """read_multi_range."""
-        return True
 
+MultiByteRangeResourceContainer.register(VSIOpener)
 
 opener = VSIOpener()

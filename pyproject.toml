@@ -32,14 +32,14 @@ dependencies = [
 test = [
     "pytest",
     "pytest-cov",
-    "rasterio",
+    "rasterio>=1.4.0",
 ]
 s3 = [
     "boto3",
 ]
 dev = [
     "pre-commit",
-    "rasterio~=1.4a3",
+    "rasterio>=1.4.0",
 ]
 
 

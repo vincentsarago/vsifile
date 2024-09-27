@@ -52,10 +52,10 @@ docs = [
 
 [project.urls]
 Homepage = 'https://developmentseed.github.io/vsifile/'
-Documentation = "https://developmentseed.github.io/vsifile/"
-Issues = "https://github.com/developmentseed/vsifile/issues"
-Source = "https://github.com/developmentseed/vsifile"
-Changelog = "https://developmentseed.github.io/vsifile/release-notes/"
+Documentation = "https://vincentsarago.github.io/vsifile/"
+Issues = "https://github.com/vincentsarago/vsifile/issues"
+Source = "https://github.com/vincentsarago/vsifile"
+Changelog = "https://vincentsarago.github.io/vsifile/release-notes/"
 
 
 [tool.hatch.version]
@@ -99,6 +99,9 @@ known_first_party = ["vsifile"]
 no_strict_optional = "True"
 
 [tool.ruff]
+line-length = 90
+
+[tool.ruff.lint]
 select = [
     "D1",  # pydocstyle errors
     "E",  # pycodestyle errors

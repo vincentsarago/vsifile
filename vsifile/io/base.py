@@ -166,6 +166,4 @@ class BaseReader(metaclass=abc.ABCMeta):
     ) -> List[Union[str, bytes]]:
         """Read multiple ranges."""
         logger.debug(f"Using MultiRange Reads for {nranges} ranges")
-        return [
-            self._read_range(offset, size) for (offset, size) in zip(offsets, sizes)
-        ]
+        return [self._read_range(offset, size) for (offset, size) in zip(offsets, sizes)]

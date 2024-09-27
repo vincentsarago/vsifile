@@ -1,6 +1,5 @@
 """HTTP VSIFile reader"""
 
-
 import httpx
 from attrs import define, field
 

@@ -158,12 +158,11 @@ class BaseReader(metaclass=abc.ABCMeta):
         _ = self.seek(offset)
         return self.read(size)
 
-    def read_multi_range(
+    def get_byte_ranges(
         self,
-        nranges: int,
         offsets: List[int],
         sizes: List[int],
     ) -> List[Union[str, bytes]]:
         """Read multiple ranges."""
-        logger.debug(f"Using MultiRange Reads for {nranges} ranges")
+        logger.debug(f"Using MultiRange Reads for {len(offsets)} ranges")
         return [self._read_range(offset, size) for (offset, size) in zip(offsets, sizes)]

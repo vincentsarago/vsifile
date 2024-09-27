@@ -41,7 +41,12 @@ dev = [
     "pre-commit",
     "rasterio>=1.4.0",
 ]
-
+benchmark = [
+    "rangehttpserver",
+    "pytest",
+    "pytest-benchmark",
+    "rasterio>=1.4.0",
+]
 
 docs = [
     "mkdocs",

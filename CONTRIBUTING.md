@@ -16,6 +16,14 @@ You can then run the tests with the following command:
 python -m pytest --cov vsifile --cov-report term-missing -s -vv
 ```
 
+##### Performance tests
+
+```sh
+python -m pip install -e ".[benchmark]"
+python -m pytest tests/benchmarks/benchmarks.py --benchmark-only --benchmark-columns 'min, max, mean, median' --benchmark-sort 'min'
+```
+
+
 ### pre-commit
 
 This repo is set to use `pre-commit` to run *isort*, *mypy* and *ruff* when committing new code.

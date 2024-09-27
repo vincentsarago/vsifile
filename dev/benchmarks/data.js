@@ -26,14 +26,14 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/benchmarks.py::test_preview[None]",
+            "name": "With VSIFILE Opener: False",
             "value": 100.05668611494244,
             "unit": "iter/sec",
             "range": "stddev: 0.0034849754106474865",
             "extra": "mean: 9.994334600000911 msec\nrounds: 50"
           },
           {
-            "name": "tests/benchmarks.py::test_preview[op1]",
+            "name": "With VSIFILE Opener: True",
             "value": 16.21769030082256,
             "unit": "iter/sec",
             "range": "stddev: 0.0068610304655547915",
@@ -64,14 +64,14 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/benchmarks.py::test_preview[None]",
+            "name": "With VSIFILE Opener: False",
             "value": 104.5597811650908,
             "unit": "iter/sec",
             "range": "stddev: 0.0034476008188711895",
             "extra": "mean: 9.563906779998774 msec\nrounds: 50"
           },
           {
-            "name": "tests/benchmarks.py::test_preview[op1]",
+            "name": "With VSIFILE Opener: True",
             "value": 18.093606828375982,
             "unit": "iter/sec",
             "range": "stddev: 0.009766131886912754",

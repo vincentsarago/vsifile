@@ -2,7 +2,9 @@
 
 ---
 
-**Source Code**: https://github.com/vincentsarago/vsifile
+**Documentation**: <a href="https://vincentsarago.github.io/vsifile/" target="_blank">https://vincentsarago.github.io/vsifile/</a>
+
+**Source Code**: <a href="https://github.com/vincentsarago/vsifile" target="_blank">https://github.com/vincentsarago/vsifile</a>
 
 ---
 

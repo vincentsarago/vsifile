@@ -32,7 +32,8 @@ def http_server():
 def test_preview(op, http_server, benchmark):
     """Test file read"""
 
-    # benchmark.name = f"With VSIFILE Opener: {op is not None}"
+    benchmark.name = f"With VSIFILE Opener: {op is not None}"
+    benchmark.fullname = f"With VSIFILE Opener: {op is not None}"
     benchmark.group = f"With VSIFILE Opener: {op is not None}"
 
     def read():

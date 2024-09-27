@@ -5,8 +5,7 @@ import os
 from typing import List, Union
 
 from attrs import define, field
-from cachetools import TTLCache, cached
-from cachetools.keys import hashkey
+from cachebox import TTLCache, cached
 from diskcache import Cache
 
 from vsifile.logger import logger
@@ -145,11 +144,9 @@ class BaseReader(metaclass=abc.ABCMeta):
 
         return output_data
 
-    @cached(  # type: ignore
-        TTLCache(
-            maxsize=vsi_settings.cache_blocks_maxsize, ttl=vsi_settings.cache_blocks_ttl
-        ),
-        key=lambda self, length: hashkey(self.name, self.tell(), length),
+    @cached(
+        TTLCache(vsi_settings.cache_blocks_maxsize, ttl=vsi_settings.cache_blocks_ttl),
+        key_maker=lambda args, kwargs: (args[0].name, args[0].tell(), args[1]),
     )
     def _cached_read(self, length: int = -1) -> Union[str, bytes]:
         return self._read(length)

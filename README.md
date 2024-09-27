@@ -82,7 +82,7 @@ with VSIFile(src_path, "rb") as f:
     assert f.tell() == 40100
     assert b_cache == b
 
-    b = f.read_multi_range(2, [100, 200], [10, 20])
+    b = f.get_byte_ranges([100, 200], [10, 20])
     assert len(b) == 2
     assert len(b[0]) == 10
     assert len(b[1]) == 20

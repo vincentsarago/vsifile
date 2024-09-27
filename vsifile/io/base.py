@@ -25,7 +25,7 @@ def init_header_cache():
 def _check_mode(instance, attribute, value):
     if value != "rb":
         raise ValueError(
-            f"Unsupported mode '{instance.__class__.__name__}' for AWSS3Reader"
+            f"Unsupported mode '{instance.__class__.__name__}'. VSIFILE offers only `read-only (rb)` mode"
         )
 
 

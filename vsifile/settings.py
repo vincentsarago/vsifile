@@ -24,7 +24,10 @@ class VSISettings(BaseSettings):
     # equivalent of GDAL_INGESTED_BYTES_AT_OPEN
     ingested_bytes_at_open: int = 32768
 
-    model_config = {"env_prefix": "VSIFILE_", "env_file": ".env"}
+    model_config = {
+        "env_prefix": "VSIFILE_",
+        "env_file": ".env",
+    }
 
     @model_validator(mode="after")
     def check_enable(self):

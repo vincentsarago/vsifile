@@ -1,11 +1,15 @@
 """test vsifile."""
 
+import logging
 import os
+import time
+from unittest.mock import patch
 
 import pytest
 
 from vsifile import VSIFile
 from vsifile.io import FileReader
+from vsifile.settings import VSISettings
 
 fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures")
 cog = os.path.join(fixtures_dir, "cog.tif")
@@ -62,3 +66,39 @@ def test_vsifile_file():
 
     with VSIFile(f"file://{cog}", "rb") as f:
         assert isinstance(f, FileReader)
+
+
+def test_vsifile_header_cache(caplog, tmp_path):
+    """Test VSIFile header cache."""
+    caplog.set_level(logging.DEBUG, logger="vsifile")
+    d = tmp_path / "cache"
+    d.mkdir()
+
+    with patch(
+        "vsifile.io.base.vsi_settings",
+        new=VSISettings(
+            cache_headers_ttl=2,
+            cache_directory=str(d),
+        ),
+    ):
+        with VSIFile(cog, "rb") as f:
+            assert len(f.header) == 32768
+        messages = [rec.message for rec in caplog.records]
+        assert f"Using {str(d)} Cache directory" in messages
+        assert "Adding Header in cache" in messages
+
+        caplog.clear()
+        with VSIFile(cog, "rb") as f:
+            assert len(f.header) == 32768
+        messages = [rec.message for rec in caplog.records]
+        assert f"Using {str(d)} Cache directory" in messages
+        assert "Found Header in cache" in messages
+
+        caplog.clear()
+        # Check that TTL worked (header should not be in cache anymore)
+        time.sleep(2)
+        with VSIFile(cog, "rb") as f:
+            assert len(f.header) == 32768
+        messages = [rec.message for rec in caplog.records]
+        assert f"Using {str(d)} Cache directory" in messages
+        assert "Adding Header in cache" in messages

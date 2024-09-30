@@ -31,7 +31,7 @@ def test_vsifile_file():
         assert "FileReader" in str(f)
 
         assert not f.closed
-        assert f.cache
+        assert f.header_cache
         assert len(f.header) == 32768
         assert f.tell() == 0
         assert f.seekable

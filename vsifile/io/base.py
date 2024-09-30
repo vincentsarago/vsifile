@@ -2,6 +2,7 @@
 
 import abc
 import os
+from threading import Lock
 from typing import List, Union
 
 from attrs import define, field
@@ -11,6 +12,11 @@ from diskcache import Cache
 
 from vsifile.logger import logger
 from vsifile.settings import vsi_settings
+
+block_cache: TTLCache = TTLCache(
+    maxsize=vsi_settings.cache_blocks_maxsize,
+    ttl=vsi_settings.cache_blocks_ttl,
+)
 
 
 def init_header_cache():
@@ -38,7 +44,7 @@ class BaseReader(metaclass=abc.ABCMeta):
 
     header: Union[str, bytes] = field(init=False)
     header_len: int = field(init=False)
-    cache: Cache = field(init=False, factory=init_header_cache)
+    header_cache: Cache = field(init=False, factory=init_header_cache)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -49,12 +55,12 @@ class BaseReader(metaclass=abc.ABCMeta):
         return hash((self.name, self.mode))
 
     def _get_header(self):
-        header = self.cache.get(f"{self.name}-header", read=True)
+        header = self.header_cache.get(f"{self.name}-header", read=True)
         if not header:
             logger.debug("Adding Header in cache")
             header = self._read(vsi_settings.ingested_bytes_at_open)
             self.seek(0)
-            self.cache.set(
+            self.header_cache.set(
                 f"{self.name}-header",
                 header,
                 expire=vsi_settings.cache_headers_ttl,
@@ -145,11 +151,10 @@ class BaseReader(metaclass=abc.ABCMeta):
 
         return output_data
 
-    @cached(  # type: ignore
-        TTLCache(
-            maxsize=vsi_settings.cache_blocks_maxsize, ttl=vsi_settings.cache_blocks_ttl
-        ),
+    @cached(
+        block_cache,
         key=lambda self, length: hashkey(self.name, self.tell(), length),
+        lock=Lock(),
     )
     def _cached_read(self, length: int = -1) -> Union[str, bytes]:
         return self._read(length)

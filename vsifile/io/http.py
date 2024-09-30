@@ -41,7 +41,7 @@ class HttpReader(BaseReader):
 
     def close(self):
         """Close."""
-        self.cache.close()
+        self.header_cache.close()
         self.client.close()
 
     @property

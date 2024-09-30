@@ -27,10 +27,11 @@ def test_vsifile_multithread(tmp_path):
 
         def _read_range(start, stop):
             with VSIFile(cog, "rb") as f:
+                _ = f.get_byte_ranges([start], [stop])
                 return f.get_byte_ranges([start], [stop])
 
         offsets = [random.randint(50000, 50100) for ii in range(200)]
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = {executor.submit(_read_range, offset, 100) for offset in offsets}
             for future in concurrent.futures.as_completed(futures):
                 try:

@@ -6,10 +6,11 @@ import time
 from unittest.mock import patch
 
 import pytest
+from diskcache import Cache
 
 from vsifile import VSIFile
 from vsifile.io import FileReader
-from vsifile.settings import VSISettings
+from vsifile.io.base import vsi_settings
 
 fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures")
 cog = os.path.join(fixtures_dir, "cog.tif")
@@ -74,28 +75,28 @@ def test_vsifile_header_cache(caplog, tmp_path):
     d = tmp_path / "cache"
     d.mkdir()
 
-    with patch(
-        "vsifile.io.base.vsi_settings",
-        new=VSISettings(
-            cache_headers_ttl=2,
-            cache_directory=str(d),
-        ),
-    ):
-        with VSIFile(cog, "rb") as f:
-            assert len(f.header) == 32768
-        messages = [rec.message for rec in caplog.records]
-        assert "Adding Header in cache" in messages
+    # Patch header_cache object
+    cache = Cache(directory=str(d), size_limit=5120000000)
+    with patch("vsifile.io.base.header_cache", new=cache):
+        # Patch TTL Cache settings
+        with patch.object(vsi_settings, "cache_headers_ttl", new=2):
+            with VSIFile(cog, "rb") as f:
+                assert f.header_cache.directory == str(d)
+                assert len(f.header) == 32768
+            messages = [rec.message for rec in caplog.records]
+            assert "Adding Header in cache" in messages
 
-        caplog.clear()
-        with VSIFile(cog, "rb") as f:
-            assert len(f.header) == 32768
-        messages = [rec.message for rec in caplog.records]
-        assert "Found Header in cache" in messages
+            caplog.clear()
+            with VSIFile(cog, "rb") as f:
+                assert f.header_cache.directory == str(d)
+                assert len(f.header) == 32768
+            messages = [rec.message for rec in caplog.records]
+            assert "Found Header in cache" in messages
 
-        caplog.clear()
-        # Check that TTL worked (header should not be in cache anymore)
-        time.sleep(2)
-        with VSIFile(cog, "rb") as f:
-            assert len(f.header) == 32768
-        messages = [rec.message for rec in caplog.records]
-        assert "Adding Header in cache" in messages
+            caplog.clear()
+            # Check that TTL worked (header should not be in cache anymore)
+            time.sleep(2)
+            with VSIFile(cog, "rb") as f:
+                assert len(f.header) == 32768
+            messages = [rec.message for rec in caplog.records]
+            assert "Adding Header in cache" in messages

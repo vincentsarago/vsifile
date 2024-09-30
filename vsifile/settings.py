@@ -39,6 +39,3 @@ class VSISettings(BaseSettings):
             self.cache_blocks_maxsize = 0
 
         return self
-
-
-vsi_settings = VSISettings()

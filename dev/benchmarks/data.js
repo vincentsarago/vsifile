@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1727701592895,
+  "lastUpdate": 1727702244930,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -266,6 +266,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.008390904075709395",
             "extra": "mean: 44.43029993999971 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "vincentsarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "vincentsarago",
+            "username": "vincentsarago"
+          },
+          "distinct": true,
+          "id": "0b16ef3964b9950bb251cc08295d247304fc82be",
+          "message": "update docs",
+          "timestamp": "2024-09-30T15:15:39+02:00",
+          "tree_id": "7bf15a1f6b650ac59a5b3643191aaf047e0287bd",
+          "url": "https://github.com/vincentsarago/vsifile/commit/0b16ef3964b9950bb251cc08295d247304fc82be"
+        },
+        "date": 1727702244687,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 108.46218778629608,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0035338355771546504",
+            "extra": "mean: 9.219802959998447 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 22.46278140961999,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00972083496500467",
+            "extra": "mean: 44.518084460000864 msec\nrounds: 50"
           }
         ]
       }

@@ -28,7 +28,7 @@ class FileReader(BaseReader):
         logger.debug(f"Opening: {self.name} (mode: {self.mode})")
         name = self.name.replace("file://", "")
         self.file = io.open(name, self.mode)
-        self._get_header()
+        self.header = self._get_header()
         return self
 
     def close(self):

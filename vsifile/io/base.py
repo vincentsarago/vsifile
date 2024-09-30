@@ -54,7 +54,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         """Object hash."""
         return hash((self.name, self.mode))
 
-    def _get_header(self):
+    def _get_header(self) -> bytes:
         header = self.header_cache.get(f"{self.name}-header", read=True)
         if not header:
             logger.debug("Adding Header in cache")
@@ -67,13 +67,11 @@ class BaseReader(metaclass=abc.ABCMeta):
                 read=True,
                 tag="data",
             )
-            self.header = header
+            return header
 
         else:
             logger.debug("Found Header in cache")
-            self.header = header.read()
-
-        self.header_len = len(self.header)
+            return header.read()
 
     @abc.abstractmethod
     def __enter__(self):
@@ -137,7 +135,7 @@ class BaseReader(metaclass=abc.ABCMeta):
 
         # TODO: maybe check if gdal is trying to make a bigger header request?
         loc = self.tell()
-        if loc + length <= self.header_len:
+        if loc + length <= len(self.header):
             logger.debug(f"Reading {loc}->{loc+length} from Header cache")
             _ = self.seek(loc + length, 0)
             return self.header[loc : loc + length]

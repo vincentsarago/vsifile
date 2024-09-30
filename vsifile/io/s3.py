@@ -95,7 +95,7 @@ class AWSS3Reader(BaseReader):
         # last_modified = head["LastModified"]
 
         self.file_size = int(head.get("ContentLength")) or 0
-        self._get_header()
+        self.header = self._get_header()
 
         return self
 

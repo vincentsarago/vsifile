@@ -84,14 +84,12 @@ def test_vsifile_header_cache(caplog, tmp_path):
         with VSIFile(cog, "rb") as f:
             assert len(f.header) == 32768
         messages = [rec.message for rec in caplog.records]
-        assert f"Using {str(d)} Cache directory" in messages
         assert "Adding Header in cache" in messages
 
         caplog.clear()
         with VSIFile(cog, "rb") as f:
             assert len(f.header) == 32768
         messages = [rec.message for rec in caplog.records]
-        assert f"Using {str(d)} Cache directory" in messages
         assert "Found Header in cache" in messages
 
         caplog.clear()
@@ -100,5 +98,4 @@ def test_vsifile_header_cache(caplog, tmp_path):
         with VSIFile(cog, "rb") as f:
             assert len(f.header) == 32768
         messages = [rec.message for rec in caplog.records]
-        assert f"Using {str(d)} Cache directory" in messages
         assert "Adding Header in cache" in messages

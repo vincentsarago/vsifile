@@ -35,7 +35,7 @@ class HttpReader(BaseReader):
         # last_modified = head.headers.get("last-modified")
 
         self.file_size = int(head.headers.get("content-length")) or 0
-        self._get_header()
+        self.header = self._get_header()
 
         return self
 

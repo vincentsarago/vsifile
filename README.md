@@ -57,14 +57,14 @@ with VSIFile(src_path, "rb") as f:
     assert "FileReader" in str(f)
 
     assert not f.closed
-    assert f._cache
-    assert len(f._header) == 32768
+    assert f.header_cache
+    assert len(f.header) == 32768
     assert f.tell() == 0
     assert f.seekable
 
     b = f.read(100)
     assert len(b) == 100
-    assert f._header[0:100] == b
+    assert f.header[0:100] == b
     assert f.tell() == 100
 
     _ = f.seek(0)
@@ -99,11 +99,33 @@ with rasterio.open("tests/fixtures/cog.tif",  opener=opener) as src:
     ...
 ```
 
-### Cache Configuration
+### Caches Configuration
 
-*vsifile* uses [DiskCache](https://grantjenks.com/docs/diskcache/) to create a **persistent** File Header cache.
+#### Header Cache
+
+*vsifile* uses [DiskCache](https://grantjenks.com/docs/diskcache/) to create a **persistent** File Header cache (TTL: *Time To Live* cache).
 By default the cache will be cleaned up when closing the file handle, you can change this behaviour by setting `VSIFILE_CACHE_DIRECTORY="{your temp directory}"` environment variable.
 
+Settings:
+
+- **VSIFILE_CACHE_DIRECTORY**: Diskcache directory (defaults to `None`)
+- **VSIFILE_CACHE_HEADERS_TTL**: Time to Live of each object in the cache, in seconds (defaults to `300`)
+- **VSIFILE_CACHE_HEADERS_MAXSIZE**: Maximum size of the cache, in Bytes (defaults to `5120000000`)
+
+#### Block Cache
+
+*vsifile* has a second layer of cache for the `blocks` (non-header read) based on [cachetools](https://cachetools.readthedocs.io/en/stable/index.html#cachetools.TTLCache).
+
+Settings:
+
+- **VSIFILE_CACHE_BLOCKS_TTL**: Time to Live of each object in the cache, in seconds (defaults to `300`)
+- **VSIFILE_CACHE_BLOCKS_MAXSIZE**: Maximum size of the cache, in number of items (defaults to `512`)
+
+Note: you can disable cache by setting: **VSIFILE_CACHE_DISABLE=TRUE**
+
+### Other Configurations
+
+- **VSIFILE_INGESTED_BYTES_AT_OPEN**: Bytes ingested when opening a file (header) (defaults to `32768`)
 
 ## Contribution & Development
 

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1727712725280,
+  "lastUpdate": 1727784398079,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -342,6 +342,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.008448643715316706",
             "extra": "mean: 45.19370741999751 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a395746ef4298e5205beb243871ba5d94d87009a",
+          "message": "Merge pull request #14 from vincentsarago/feature/persistant_headers_cache\n\ncreate header cache layer outside VSIFile object",
+          "timestamp": "2024-10-01T14:04:50+02:00",
+          "tree_id": "b0306e81ec159a07b076674e9458deb5ce323bd6",
+          "url": "https://github.com/vincentsarago/vsifile/commit/a395746ef4298e5205beb243871ba5d94d87009a"
+        },
+        "date": 1727784397655,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 91.74371231762422,
+            "unit": "iter/sec",
+            "range": "stddev: 0.003750775450334936",
+            "extra": "mean: 10.899929539998539 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 24.29662449265222,
+            "unit": "iter/sec",
+            "range": "stddev: 0.01032094482861949",
+            "extra": "mean: 41.1579806200001 msec\nrounds: 50"
           }
         ]
       }

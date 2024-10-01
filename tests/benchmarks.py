@@ -4,9 +4,11 @@ import functools
 import os
 import threading
 from http.server import HTTPServer
+from unittest.mock import patch
 
 import pytest
 import rasterio
+from diskcache import Cache
 from RangeHTTPServer import RangeRequestHandler
 
 from vsifile.rasterio import opener
@@ -29,23 +31,30 @@ def http_server():
 
 
 @pytest.mark.parametrize("op", [None, opener])
-def test_preview(op, http_server, benchmark):
+def test_preview(op, http_server, benchmark, tmp_path):
     """Test file read"""
 
     benchmark.name = f"With VSIFILE Opener: {op is not None}"
     benchmark.fullname = f"With VSIFILE Opener: {op is not None}"
     benchmark.group = f"With VSIFILE Opener: {op is not None}"
 
-    def read():
-        with rasterio.Env(
-            GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR",
-            GDAL_INGESTED_BYTES_AT_OPEN="32768",
-            GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="TRUE",
-        ):
-            with rasterio.open(
-                f"{http_server}/cog.tif",
-                opener=op,
-            ) as src:
-                return src.read(indexes=1, out_shape=(1, src.height // 2, src.width // 2))
+    d = tmp_path / "cache"
+    d.mkdir()
+    cache = Cache(directory=str(d), size_limit=5120000000)
+    with patch("vsifile.io.base.header_cache", new=cache):
 
-    _ = benchmark.pedantic(read, iterations=1, rounds=50)
+        def read():
+            with rasterio.Env(
+                GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR",
+                GDAL_INGESTED_BYTES_AT_OPEN="32768",
+                GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="TRUE",
+            ):
+                with rasterio.open(
+                    f"{http_server}/cog.tif",
+                    opener=op,
+                ) as src:
+                    return src.read(
+                        indexes=1, out_shape=(1, src.height // 2, src.width // 2)
+                    )
+
+        _ = benchmark.pedantic(read, iterations=1, rounds=50)

@@ -101,7 +101,6 @@ class AWSS3Reader(BaseReader):
 
     def close(self):
         """Close."""
-        self.header_cache.close()
         self.client.close()
         self.is_closed = True
 

@@ -33,7 +33,6 @@ class FileReader(BaseReader):
 
     def close(self):
         """Close."""
-        self.header_cache.close()
         self.file.close()
 
     def seekable(self) -> bool:

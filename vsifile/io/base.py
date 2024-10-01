@@ -11,21 +11,21 @@ from cachetools.keys import hashkey
 from diskcache import Cache
 
 from vsifile.logger import logger
-from vsifile.settings import vsi_settings
+from vsifile.settings import VSISettings
 
+vsi_settings = VSISettings()
+
+# TTL Block Cache (in-memory)
 block_cache: TTLCache = TTLCache(
     maxsize=vsi_settings.cache_blocks_maxsize,
     ttl=vsi_settings.cache_blocks_ttl,
 )
 
-
-def init_header_cache():
-    """Create or Connect to Header Cache layer."""
-    logger.debug(f"Using {vsi_settings.cache_directory} Cache directory")
-    return Cache(
-        directory=vsi_settings.cache_directory,
-        size_limit=vsi_settings.cache_headers_maxsize,
-    )
+# TTL Header Cache (in-disk)
+header_cache: Cache = Cache(
+    directory=vsi_settings.cache_directory,
+    size_limit=vsi_settings.cache_headers_maxsize,
+)
 
 
 def _check_mode(instance, attribute, value):
@@ -43,8 +43,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     mode: str = field(default="rb", validator=_check_mode)
 
     header: Union[str, bytes] = field(init=False)
-    header_len: int = field(init=False)
-    header_cache: Cache = field(init=False, factory=init_header_cache)
+    header_cache: Cache = field(init=False, factory=lambda: header_cache)
 
     def __repr__(self) -> str:
         """Reader repr."""

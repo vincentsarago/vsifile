@@ -5,8 +5,9 @@ import os
 import random
 from unittest.mock import patch
 
+from diskcache import Cache
+
 from vsifile import VSIFile
-from vsifile.settings import VSISettings
 
 fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures")
 cog = os.path.join(fixtures_dir, "cog.tif")
@@ -17,13 +18,8 @@ def test_vsifile_multithread(tmp_path):
     d = tmp_path / "cache"
     d.mkdir()
 
-    with patch(
-        "vsifile.io.base.vsi_settings",
-        new=VSISettings(
-            cache_headers_ttl=10,
-            cache_directory=str(d),
-        ),
-    ):
+    cache = Cache(directory=str(d), size_limit=5120000000)
+    with patch("vsifile.io.base.header_cache", new=cache):
 
         def _read_range(start, stop):
             with VSIFile(cog, "rb") as f:

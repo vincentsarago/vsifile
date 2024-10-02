@@ -20,7 +20,7 @@ python -m pytest --cov vsifile --cov-report term-missing -s -vv
 
 ```sh
 python -m pip install -e ".[benchmark]"
-python -m pytest tests/benchmarks/benchmarks.py --benchmark-only --benchmark-columns 'min, max, mean, median' --benchmark-sort 'min'
+python -m pytest tests/benchmarks.py --benchmark-only --benchmark-columns 'min, max, mean, median' --benchmark-sort 'min'
 ```
 
 

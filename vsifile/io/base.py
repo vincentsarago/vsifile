@@ -1,7 +1,6 @@
 """Base VSIFile reader"""
 
 import abc
-import os
 from threading import Lock
 from typing import List, Union
 
@@ -117,12 +116,16 @@ class BaseReader(metaclass=abc.ABCMeta):
         ...
 
     @property
+    @abc.abstractmethod
+    def mtime(self) -> int:
+        """return file modified date."""
+        ...
+
+    @property
+    @abc.abstractmethod
     def size(self) -> int:
         """return file size."""
-        self.seek(0, os.SEEK_END)
-        size = self.tell()
-        self.seek(0)
-        return size
+        ...
 
     def read(self, length: int = -1) -> Union[str, bytes]:
         """Read stream."""

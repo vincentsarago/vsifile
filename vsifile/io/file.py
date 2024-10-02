@@ -1,6 +1,7 @@
 """File VSIFile reader"""
 
 import io
+import os
 from typing import Union
 
 from attrs import define, field
@@ -56,3 +57,16 @@ class FileReader(BaseReader):
         """Low level read method."""
         logger.debug(f"Fetching {self.tell()}->{self.tell() + length}")
         return self.file.read(length)
+
+    @property
+    def mtime(self) -> int:
+        """retunr file modified date."""
+        return int(os.stat(self.name).st_mtime)
+
+    @property
+    def size(self) -> int:
+        """return file size."""
+        self.seek(0, os.SEEK_END)
+        size = self.tell()
+        self.seek(0)
+        return size

@@ -30,8 +30,10 @@ class AWSS3Reader(BaseReader):
     key: str = field(init=False, default=None)
 
     loc: int = field(default=0, init=False)
-    file_size: int = field(default=0, init=False)
     is_closed: bool = field(default=False, init=False)
+
+    _size: int = field(default=0, init=False)
+    _mtime: int = field(default=0, init=False)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -91,10 +93,8 @@ class AWSS3Reader(BaseReader):
         assert head["ResponseMetadata"]["HTTPStatusCode"] == 200
         assert head.get("AcceptRanges") == "bytes"
 
-        # discard header cache ?
-        # last_modified = head["LastModified"]
-
-        self.file_size = int(head.get("ContentLength")) or 0
+        self._mtime = int(head["LastModified"].timestamp())
+        self._size = int(head.get("ContentLength")) or 0
         self.header = self._get_header()
 
         return self
@@ -140,7 +140,12 @@ class AWSS3Reader(BaseReader):
     @property
     def size(self) -> int:
         """return file size."""
-        return self.file_size
+        return self._size
+
+    @property
+    def mtime(self) -> int:
+        """retunr file modified date."""
+        return self._mtime
 
     def _read(self, length: int = -1) -> Union[str, bytes]:
         """Low level read method."""

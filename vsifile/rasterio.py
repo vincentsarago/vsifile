@@ -22,7 +22,7 @@ class VSIOpener:
         """init."""
         self._obj = VSIFile
 
-    def open(self, path, mode="r", **kwds) -> BaseReader:
+    def open(self, path, mode="rb", **kwds) -> BaseReader:
         """Return Obj."""
         return self._obj(path, mode=mode, **kwds)
 
@@ -40,12 +40,13 @@ class VSIOpener:
 
     def mtime(self, path) -> int:
         """mtime."""
-        return 0
+        with self._obj(path, mode="rb") as f:
+            return f.mtime
 
     def size(self, path) -> int:
         """size."""
-        with self._obj(path) as f:
-            return f.size()
+        with self._obj(path, mode="rb") as f:
+            return f.size
 
 
 MultiByteRangeResourceContainer.register(VSIOpener)

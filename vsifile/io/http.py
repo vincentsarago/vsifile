@@ -1,5 +1,7 @@
 """HTTP VSIFile reader"""
 
+from datetime import datetime
+
 import httpx
 from attrs import define, field
 
@@ -14,7 +16,9 @@ class HttpReader(BaseReader):
     client: httpx.Client = field(factory=httpx.Client)
 
     loc: int = field(default=0, init=False)
-    file_size: int = field(default=0, init=False)
+
+    _size: int = field(default=0, init=False)
+    _mtime: int = field(default=0, init=False)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -31,10 +35,14 @@ class HttpReader(BaseReader):
         assert head.status_code == 200
         assert head.headers.get("accept-ranges") == "bytes"
 
-        # discard header cache ?
-        # last_modified = head.headers.get("last-modified")
+        if d := head.headers.get("last-modified"):
+            self._mtime = int(
+                datetime.strptime(d, "%a, %d %b %Y %H:%M:%S %Z").timestamp()
+            )
+        else:
+            self._mtime = int(datetime.today().timestamp())
 
-        self.file_size = int(head.headers.get("content-length")) or 0
+        self._size = int(head.headers.get("content-length")) or 0
         self.header = self._get_header()
 
         return self
@@ -79,7 +87,12 @@ class HttpReader(BaseReader):
     @property
     def size(self) -> int:
         """return file size."""
-        return self.file_size
+        return self._size
+
+    @property
+    def mtime(self) -> int:
+        """retunr file modified date."""
+        return self._mtime
 
     def _read(self, length: int = -1) -> bytes:
         """Low level read method."""

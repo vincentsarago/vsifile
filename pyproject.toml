@@ -79,6 +79,8 @@ exclude = [
   "AUTHORS.txt",
   "CHANGES.md",
   "CONTRIBUTING.md",
+  "/examples",
+  ".env.example",
 ]
 
 [build-system]
@@ -120,3 +122,18 @@ ignore = [
     "B008",  # do not perform function calls in argument defaults
     "B905",  # ignore zip() without an explicit strict= parameter, only support with python >3.10
 ]
+
+
+[tool.bumpversion]
+current_version = "0.1.0"
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+tag = true
+commit = true
+tag_name = "{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "vsifile/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'

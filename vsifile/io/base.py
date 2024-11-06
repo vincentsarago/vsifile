@@ -1,9 +1,14 @@
 """Base VSIFile reader"""
 
-import abc
-from threading import Lock
-from typing import List, Union
+from __future__ import annotations
 
+import abc
+import datetime
+from functools import cached_property
+from threading import Lock
+from typing import TYPE_CHECKING, List
+
+import obstore as obs
 from attrs import define, field
 from cachetools import TTLCache, cached
 from cachetools.keys import hashkey
@@ -11,6 +16,10 @@ from diskcache import Cache
 
 from vsifile.logger import logger
 from vsifile.settings import VSISettings
+
+if TYPE_CHECKING:
+    from obstore.store import ObjectStore
+
 
 vsi_settings = VSISettings()
 
@@ -41,23 +50,37 @@ class BaseReader(metaclass=abc.ABCMeta):
     name: str = field()
     mode: str = field(default="rb", validator=_check_mode)
 
-    header: Union[str, bytes] = field(init=False)
+    header: bytes = field(init=False)
     header_cache: Cache = field(init=False, factory=lambda: header_cache)
 
+    _key: str = field(init=False)
+    _store: ObjectStore = field(init=False)
+    _loc: int = field(init=False, default=0)
+    _closed: bool = field(init=False, default=True)
+
+    @abc.abstractmethod
     def __repr__(self) -> str:
         """Reader repr."""
-        return f"{self.__class__.__name__}({self.name})"
+        ...
 
+    @abc.abstractmethod
     def __hash__(self):
         """Object hash."""
-        return hash((self.name, self.mode))
+        ...
 
     def _get_header(self) -> bytes:
         header = self.header_cache.get(f"{self.name}-header", read=True)
         if not header:
             logger.debug("Adding Header in cache")
-            header = self._read(vsi_settings.ingested_bytes_at_open)
-            self.seek(0)
+            header = bytes(
+                obs.get_range(
+                    self._store,
+                    self._key,
+                    start=0,
+                    end=vsi_settings.ingested_bytes_at_open,
+                )
+            )
+
             self.header_cache.set(
                 f"{self.name}-header",
                 header,
@@ -71,63 +94,65 @@ class BaseReader(metaclass=abc.ABCMeta):
             logger.debug("Found Header in cache")
             return header.read()
 
-    @abc.abstractmethod
     def __enter__(self):
         """Open file and fetch header."""
-        ...
+        logger.debug(f"Opening: {self.name} (mode: {self.mode})")
+        self._closed = False
+        self.header = self._get_header()
+        return self
 
     def open(self):
         """Open."""
         return self.__enter__()
 
-    @abc.abstractmethod
     def close(self):
         """Close."""
-        ...
+        self._closed = True
 
     def __exit__(self, exc_type, exc_value, traceback):
         """Context Exit."""
         self.close()
 
-    @abc.abstractmethod
-    def seekable(self) -> bool:
-        """file seekable."""
-        ...
-
     @property
-    @abc.abstractmethod
     def closed(self) -> bool:
         """Closed?"""
-        ...
+        return self._closed
 
-    @abc.abstractmethod
-    def seek(self, loc: int, whence: int = 0) -> int:
-        """Change stream position."""
-        ...
-
-    @abc.abstractmethod
-    def tell(self) -> int:
-        """Return stream position."""
-        ...
-
-    @abc.abstractmethod
-    def _read(self, length: int = -1) -> Union[str, bytes]:
-        """Low level read method."""
-        ...
-
-    @property
-    @abc.abstractmethod
-    def mtime(self) -> int:
+    @cached_property
+    def mtime(self) -> datetime.datetime:
         """return file modified date."""
-        ...
+        head = obs.head(self._store, self._key)
+        return head["last_modified"]
 
-    @property
-    @abc.abstractmethod
+    @cached_property
     def size(self) -> int:
         """return file size."""
-        ...
+        head = obs.head(self._store, self._key)
+        return head["size"]
 
-    def read(self, length: int = -1) -> Union[str, bytes]:
+    @cached_property
+    def seekable(self) -> bool:
+        """file seekable."""
+        return obs.head(self._store, self._key) is not None
+
+    def seek(self, loc: int, whence: int = 0) -> int:
+        """Change stream position."""
+        if whence == 0:
+            self._loc = loc
+
+        elif whence == 1:
+            self._loc += loc
+
+        else:
+            raise ValueError(f"do not support whence={whence}")
+
+        return self._loc
+
+    def tell(self) -> int:
+        """Return stream position."""
+        return self._loc
+
+    def read(self, length: int = -1) -> bytes:
         """Read stream."""
         if self.closed:
             raise ValueError("I/O operation on closed file.")
@@ -142,7 +167,7 @@ class BaseReader(metaclass=abc.ABCMeta):
             _ = self.seek(loc + length, 0)
             return self.header[loc : loc + length]
 
-        output_data = self._cached_read(length)
+        output_data = self.get_byte_range(loc, length)
 
         # If we read from cache, the stream position won't be updated
         # so we need to do it manually
@@ -153,21 +178,34 @@ class BaseReader(metaclass=abc.ABCMeta):
 
     @cached(
         block_cache,
-        key=lambda self, length: hashkey(self.name, self.tell(), length),
+        key=lambda self, offset, size: hashkey(self.name, offset, size),
         lock=Lock(),
     )
-    def _cached_read(self, length: int = -1) -> Union[str, bytes]:
-        return self._read(length)
-
-    def _read_range(self, offset, size) -> Union[str, bytes]:
-        _ = self.seek(offset)
-        return self.read(size)
+    def get_byte_range(self, offset, size) -> bytes:
+        """Read range."""
+        logger.debug(f"Fetching {offset}->{offset + size} range")
+        self._loc += size
+        return bytes(
+            obs.get_range(
+                self._store,
+                self._key,
+                start=offset,
+                end=offset + size,
+            )
+        )
 
     def get_byte_ranges(
         self,
         offsets: List[int],
         sizes: List[int],
-    ) -> List[Union[str, bytes]]:
+    ) -> List[bytes]:
         """Read multiple ranges."""
         logger.debug(f"Using MultiRange Reads for {len(offsets)} ranges")
-        return [self._read_range(offset, size) for (offset, size) in zip(offsets, sizes)]
+        ends = [offset + size for offset, size in zip(offsets, sizes)]
+        self._loc = offsets[-1] + sizes[-1]
+
+        # TODO add blocks in cache
+        return [
+            bytes(buff)
+            for buff in obs.get_ranges(self._store, self._key, starts=offsets, ends=ends)
+        ]

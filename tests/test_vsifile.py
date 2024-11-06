@@ -1,5 +1,6 @@
 """test vsifile."""
 
+import datetime
 import logging
 import os
 import time
@@ -62,6 +63,9 @@ def test_vsifile_file():
         assert len(b[0]) == 10
         assert len(b[1]) == 20
         assert f.tell() == 220
+
+        assert f.size
+        assert isinstance(f.mtime, datetime.datetime)
 
     assert f.closed
 

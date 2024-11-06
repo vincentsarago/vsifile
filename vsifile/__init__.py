@@ -46,7 +46,7 @@ def from_uri(uri) -> Type[BaseReader]:
     return _get_filesystem_class(parsed.scheme)
 
 
-def VSIFile(uri: str, mode: str = "rb") -> BaseReader:
+def VSIFile(uri: str, mode: str = "rb", **kwargs) -> BaseReader:
     """TopLevel file Opener."""
     fs = from_uri(uri)
-    return fs(name=uri, mode=mode)  # type: ignore
+    return fs(name=uri, mode=mode, **kwargs)  # type: ignore

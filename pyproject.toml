@@ -23,7 +23,7 @@ dependencies = [
     "diskcache",
     "attrs",
     "cachetools",
-    "httpx",
+    "obstore==0.3.0b2",
     "pydantic",
     "pydantic-settings",
 ]
@@ -32,18 +32,16 @@ dependencies = [
 test = [
     "pytest",
     "pytest-cov",
+    "rangehttpserver",
     "rasterio>=1.4.0",
-]
-s3 = [
-    "boto3",
 ]
 dev = [
     "pre-commit",
     "rasterio>=1.4.0",
 ]
 benchmark = [
-    "rangehttpserver",
     "pytest",
+    "rangehttpserver",
     "pytest-benchmark",
     "rasterio>=1.4.0",
 ]

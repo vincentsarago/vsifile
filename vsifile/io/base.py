@@ -57,6 +57,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     _store: ObjectStore = field(init=False)
     _loc: int = field(init=False, default=0)
     _closed: bool = field(init=False, default=True)
+    _size: int = field(init=False)
 
     @abc.abstractmethod
     def __repr__(self) -> str:
@@ -69,6 +70,9 @@ class BaseReader(metaclass=abc.ABCMeta):
         ...
 
     def _get_header(self) -> bytes:
+        head = obs.head(self._store, self._key)
+        self._size = head["size"]
+
         header = self.header_cache.get(f"{self.name}-header", read=True)
         if not header:
             logger.debug("Adding Header in cache")
@@ -77,7 +81,9 @@ class BaseReader(metaclass=abc.ABCMeta):
                     self._store,
                     self._key,
                     start=0,
-                    end=vsi_settings.ingested_bytes_at_open,
+                    end=vsi_settings.ingested_bytes_at_open
+                    if self._size > vsi_settings.ingested_bytes_at_open
+                    else self._size,
                 )
             )
 
@@ -124,11 +130,10 @@ class BaseReader(metaclass=abc.ABCMeta):
         head = obs.head(self._store, self._key)
         return head["last_modified"]
 
-    @cached_property
+    @property
     def size(self) -> int:
         """return file size."""
-        head = obs.head(self._store, self._key)
-        return head["size"]
+        return self._size
 
     @cached_property
     def seekable(self) -> bool:

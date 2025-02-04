@@ -205,8 +205,10 @@ class BaseReader(metaclass=abc.ABCMeta):
         sizes: List[int],
     ) -> List[bytes]:
         """Read multiple ranges."""
-        logger.debug(f"Using MultiRange Reads for {len(offsets)} ranges")
         ends = [offset + size for offset, size in zip(offsets, sizes)]
+        ranges = [f"{s}-{e}" for s, e in zip(offsets, ends)]
+        logger.debug(f"Using MultiRange Reads for {ranges}")
+
         self._loc = offsets[-1] + sizes[-1]
 
         # TODO add blocks in cache

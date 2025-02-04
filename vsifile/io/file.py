@@ -15,7 +15,7 @@ class FileReader(BaseReader):
     def __attrs_post_init__(self):
         """Create Store and parse name."""
         self._store = LocalStore()
-        self._key = str(Path(self.name.replace("file://", "")).absolute())
+        self._key = str(Path(self.name.replace("file://", "")).resolve())
 
     def __repr__(self) -> str:
         """Reader repr."""

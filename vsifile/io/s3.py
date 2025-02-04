@@ -1,6 +1,8 @@
 """HTTP VSIFile reader"""
 
 import os
+import urllib.error
+import urllib.request
 from typing import Dict, Optional
 from urllib.parse import urlparse
 
@@ -9,10 +11,15 @@ from obstore.store import S3Store
 
 from vsifile.io.base import BaseReader
 
-try:
-    from boto3.session import Session as boto3_session
-except ImportError:  # pragma: nocover
-    boto3_session = None  # type: ignore
+
+def _find_bucket_region(bucket: str) -> Optional[str]:
+    try:
+        response = urllib.request.urlopen(f"https://{bucket}.s3.amazonaws.com")
+        return response.getheader("x-amz-bucket-region")
+    except urllib.error.HTTPError:
+        pass
+
+    return None
 
 
 @define
@@ -25,6 +32,7 @@ class AWSS3Reader(BaseReader):
     config: Dict = field(factory=dict)
     client_options: Dict = field(factory=dict)
     retry_config: Optional[Dict] = field(default=None)
+    infer_region: bool = field(default=True)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -57,43 +65,28 @@ class AWSS3Reader(BaseReader):
         if "ALLOW_HTTP" not in keys and use_https in ["NO", "FALSE", "OFF"]:
             options["ALLOW_HTTP"] = "TRUE"
 
-        # 1. Create Store from session
-        if boto3_session:
-            if aws_profile := os.environ.get("AWS_PROFILE"):
-                session = boto3_session(profile_name=aws_profile)
+        region_name_env = (
+            os.environ.get("AWS_REGION", os.environ.get("AWS_DEFAULT_REGION")) or None
+        )
 
-            else:
-                access_key = os.environ.get("AWS_ACCESS_KEY_ID")
-                secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-                access_token = os.environ.get("AWS_SESSION_TOKEN")
+        region_keys = [
+            "AWS_REGION",
+            "aws_region",
+            "region",
+            "AWS_DEFAULT_REGION",
+            "aws_default_region",
+            "default_region",
+        ]
+        region_name_config = next((config[k] for k in region_keys if k in config), None)
 
-                # AWS_REGION is GDAL specific. Later overloaded by standard AWS_DEFAULT_REGION
-                region_name = (
-                    os.environ.get("AWS_DEFAULT_REGION", os.environ.get("AWS_REGION"))
-                    or None
-                )
+        if self.infer_region and not region_name_config:
+            config["AWS_REGION"] = _find_bucket_region(bucket) or region_name_env
 
-                session = boto3_session(
-                    aws_access_key_id=access_key,
-                    aws_secret_access_key=secret_access_key,
-                    aws_session_token=access_token,
-                    region_name=region_name,
-                )
-
-            self._store = S3Store.from_session(
-                session,
-                bucket,
-                config={**self.config, **config},
-                client_options={**self.client_options, **options},
-                retry_config=self.retry_config,
-            )
-
-        else:
-            self._store = S3Store.from_env(
-                bucket,
-                config={**self.config, **config},
-                client_options={**self.client_options, **options},
-                retry_config=self.retry_config,
-            )
+        self._store = S3Store(
+            bucket,
+            config={**self.config, **config},
+            client_options={**self.client_options, **options},
+            retry_config=self.retry_config,
+        )
 
         return self

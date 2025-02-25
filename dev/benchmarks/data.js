@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1740524803922,
+  "lastUpdate": 1740527520094,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -608,6 +608,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.008259019614533734",
             "extra": "mean: 15.339912319999485 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "187aa614f2e4f955924bd4a7bf767f481e976a18",
+          "message": "Merge pull request #16 from vincentsarago/feature/fake-size-mtime\n\nFeature/fake size mtime",
+          "timestamp": "2025-02-26T00:50:49+01:00",
+          "tree_id": "ba7a20687d44069a34691ca199e7bc9e1941c903",
+          "url": "https://github.com/vincentsarago/vsifile/commit/187aa614f2e4f955924bd4a7bf767f481e976a18"
+        },
+        "date": 1740527519835,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 102.66172343898548,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0034186585291223386",
+            "extra": "mean: 9.74072873999944 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 65.07712542634593,
+            "unit": "iter/sec",
+            "range": "stddev: 0.006764062339112071",
+            "extra": "mean: 15.366382479997469 msec\nrounds: 50"
           }
         ]
       }

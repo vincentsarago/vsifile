@@ -40,13 +40,11 @@ class VSIOpener:
 
     def mtime(self, path) -> int:
         """mtime."""
-        with self._obj(path, mode="rb") as f:
-            return f.mtime
+        return 0
 
     def size(self, path) -> int:
         """size."""
-        with self._obj(path, mode="rb") as f:
-            return f.size
+        return 1
 
 
 MultiByteRangeResourceContainer.register(VSIOpener)

@@ -70,7 +70,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         ...
 
     def _get_header(self) -> bytes:
-        logger.debug("VSIFILE_INFO_HEADER_OUT: HEAD")
+        logger.debug("VSIFILE_INFO: HEAD")
         head = obs.head(self._store, self._key)
         self._size = head["size"]
 
@@ -81,6 +81,7 @@ class BaseReader(metaclass=abc.ABCMeta):
                 if self._size > vsi_settings.ingested_bytes_at_open
                 else self._size
             )
+            logger.debug("VSIFILE_INFO: GET")
             logger.debug(f"VSIFILE: Downloading: 0-{end}")
             header = bytes(obs.get_range(self._store, self._key, start=0, end=end))
 
@@ -125,7 +126,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     @cached_property
     def mtime(self) -> datetime.datetime:
         """return file modified date."""
-        logger.debug("VSIFILE_INFO_HEADER_OUT: HEAD")
+        logger.debug("VSIFILE_INFO: HEAD")
         head = obs.head(self._store, self._key)
         return head["last_modified"]
 
@@ -137,7 +138,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     @cached_property
     def seekable(self) -> bool:
         """file seekable."""
-        logger.debug("VSIFILE_INFO_HEADER_OUT: HEAD")
+        logger.debug("VSIFILE_INFO: HEAD")
         return obs.head(self._store, self._key) is not None
 
     def seek(self, loc: int, whence: int = 0) -> int:
@@ -188,6 +189,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     )
     def get_byte_range(self, offset, size) -> bytes:
         """Read range."""
+        logger.debug("VSIFILE_INFO: GET")
         logger.debug(f"VSIFILE: Downloading: {offset}-{offset + size}")
         self._loc += size
         return bytes(
@@ -205,6 +207,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         sizes: List[int],
     ) -> List[bytes]:
         """Read multiple ranges."""
+        logger.debug("VSIFILE_INFO: GET")
         logger.debug("VSIFILE: Using MultiRange Reads")
 
         ends = [offset + size for offset, size in zip(offsets, sizes)]

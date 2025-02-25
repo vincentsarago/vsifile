@@ -1,20 +1,25 @@
 """HTTP VSIFile reader"""
 
 import os
-from typing import Any, Optional, Union
+import urllib.error
+import urllib.request
+from typing import Dict, Optional
 from urllib.parse import urlparse
 
 from attrs import define, field
+from obstore.store import S3Store
 
 from vsifile.io.base import BaseReader
-from vsifile.logger import logger
 
-try:
-    from boto3.session import Session as boto3_session
-    from botocore.exceptions import ClientError
-except ImportError:  # pragma: nocover
-    boto3_session = None  # type: ignore
-    ClientError = None  # type: ignore
+
+def _find_bucket_region(bucket: str) -> Optional[str]:
+    try:
+        response = urllib.request.urlopen(f"https://{bucket}.s3.amazonaws.com")
+        return response.getheader("x-amz-bucket-region")
+    except urllib.error.HTTPError:
+        pass
+
+    return None
 
 
 @define
@@ -24,16 +29,10 @@ class AWSS3Reader(BaseReader):
     requester_pays: bool = field(
         factory=lambda: os.environ.get("AWS_REQUEST_PAYER", "").lower() == "requester"
     )
-    client: Optional[Any] = field(default=None)
-
-    bucket: str = field(init=False, default=None)
-    key: str = field(init=False, default=None)
-
-    loc: int = field(default=0, init=False)
-    is_closed: bool = field(default=False, init=False)
-
-    _size: int = field(default=0, init=False)
-    _mtime: int = field(default=0, init=False)
+    config: Dict = field(factory=dict)
+    client_options: Dict = field(factory=dict)
+    retry_config: Optional[Dict] = field(default=None)
+    infer_region: bool = field(default=True)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -45,120 +44,51 @@ class AWSS3Reader(BaseReader):
 
     def __attrs_post_init__(self):
         """Setup Boto3 Client."""
-        assert boto3_session is not None, "'boto3' must be installed to use AWSS3Reader"
+        parsed = urlparse(self.name)
+        bucket = parsed.netloc
+        self._key = parsed.path.strip("/")
 
-        if not self.client:
-            if profile_name := os.environ.get("AWS_PROFILE", None):
-                session = boto3_session(profile_name=profile_name)
+        config = {}
+        keys = {k.upper() for k in list(self.config)}
 
-            else:
-                access_key = os.environ.get("AWS_ACCESS_KEY_ID", None)
-                secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY", None)
-                access_token = os.environ.get("AWS_SESSION_TOKEN", None)
-
-                # AWS_REGION is GDAL specific. Later overloaded by standard AWS_DEFAULT_REGION
-                region_name = os.environ.get(
-                    "AWS_DEFAULT_REGION", os.environ.get("AWS_REGION", None)
-                )
-
-                session = boto3_session(
-                    aws_access_key_id=access_key,
-                    aws_secret_access_key=secret_access_key,
-                    aws_session_token=access_token,
-                    region_name=region_name or None,
-                )
-
+        endpoint_url = os.environ.get("AWS_S3_ENDPOINT", None)
+        use_https = os.environ.get("AWS_HTTPS", "YES")
+        if not {"AWS_ENDPOINT_URL", "AWS_ENDPOINT"}.intersection(keys) and endpoint_url:
             # AWS_S3_ENDPOINT and AWS_HTTPS are GDAL config options of vsis3 driver
             # https://gdal.org/user/virtual_file_systems.html#vsis3-aws-s3-files
-            endpoint_url = os.environ.get("AWS_S3_ENDPOINT", None)
-            if endpoint_url:
-                use_https = os.environ.get("AWS_HTTPS", "YES")
-                if use_https.upper() in ["YES", "TRUE", "ON"]:
-                    endpoint_url = "https://" + endpoint_url
+            if use_https.upper() in ["YES", "TRUE", "ON"]:
+                config["AWS_ENDPOINT_URL"] = "https://" + endpoint_url
+            else:
+                config["AWS_ENDPOINT_URL"] = "http://" + endpoint_url
 
-                else:
-                    endpoint_url = "http://" + endpoint_url
+        options = {}
+        keys = [k.upper() for k in list(self.client_options)]
+        if "ALLOW_HTTP" not in keys and use_https in ["NO", "FALSE", "OFF"]:
+            options["ALLOW_HTTP"] = "TRUE"
 
-            self.client = session.client("s3", endpoint_url=endpoint_url)
+        region_name_env = (
+            os.environ.get("AWS_REGION", os.environ.get("AWS_DEFAULT_REGION")) or None
+        )
 
-        parsed = urlparse(self.name)
-        self.bucket = parsed.netloc
-        self.key = parsed.path.strip("/")
+        region_keys = [
+            "AWS_REGION",
+            "aws_region",
+            "region",
+            "AWS_DEFAULT_REGION",
+            "aws_default_region",
+            "default_region",
+        ]
+        region_name_config = next(
+            (self.config[k] for k in region_keys if k in self.config), None
+        )
+        if self.infer_region and not region_name_config:
+            config["AWS_REGION"] = _find_bucket_region(bucket) or region_name_env
 
-    def __enter__(self):
-        """Open file and fetch header."""
-        logger.debug(f"Opening: {self.name} (mode: {self.mode})")
-
-        head = self.client.head_object(Bucket=self.bucket, Key=self.key)
-        assert head["ResponseMetadata"]["HTTPStatusCode"] == 200
-        assert head.get("AcceptRanges") == "bytes"
-
-        self._mtime = int(head["LastModified"].timestamp())
-        self._size = int(head.get("ContentLength")) or 0
-        self.header = self._get_header()
+        self._store = S3Store(
+            bucket,
+            config={**self.config, **config},
+            client_options={**self.client_options, **options},
+            retry_config=self.retry_config,
+        )
 
         return self
-
-    def close(self):
-        """Close."""
-        self.client.close()
-        self.is_closed = True
-
-    @property
-    def closed(self) -> bool:
-        """Closed?"""
-        return self.is_closed
-
-    def seekable(self) -> bool:
-        """seekable stream."""
-        return True
-
-    def seek(self, loc: int, whence: int = 0) -> int:
-        """Change stream position."""
-        if whence == 0:
-            self.loc = loc
-
-        elif whence == 1:
-            self.loc += loc
-
-        elif whence == 2:
-            if not self.size:
-                raise ValueError(
-                    "Cannot use end of stream because we don't know the size of the stream"
-                )
-            self.loc = self.size + loc
-
-        else:
-            raise ValueError(f"Invalid Whence value: {whence}")
-
-        return self.loc
-
-    def tell(self) -> int:
-        """Return stream position."""
-        return self.loc
-
-    @property
-    def size(self) -> int:
-        """return file size."""
-        return self._size
-
-    @property
-    def mtime(self) -> int:
-        """retunr file modified date."""
-        return self._mtime
-
-    def _read(self, length: int = -1) -> Union[str, bytes]:
-        """Low level read method."""
-        logger.debug(f"Fetching {self.tell()}->{self.tell() + length}")
-
-        params = {
-            "Bucket": self.bucket,
-            "Key": self.key,
-            "Range": f"bytes={self.loc}-{self.loc + length - 1}",
-        }
-        if self.requester_pays:
-            params["RequestPayer"] = "requester"
-
-        response = self.client.get_object(**params)
-        _ = self.seek(self.loc + length, 0)
-        return response["Body"].read()

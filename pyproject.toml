@@ -16,6 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: GIS",
 ]
 dynamic = ["version"]
@@ -23,7 +24,7 @@ dependencies = [
     "diskcache",
     "attrs",
     "cachetools",
-    "httpx",
+    "obstore>=0.4,<0.5",
     "pydantic",
     "pydantic-settings",
 ]
@@ -32,18 +33,16 @@ dependencies = [
 test = [
     "pytest",
     "pytest-cov",
+    "rangehttpserver",
     "rasterio>=1.4.0",
-]
-s3 = [
-    "boto3",
 ]
 dev = [
     "pre-commit",
     "rasterio>=1.4.0",
 ]
 benchmark = [
-    "rangehttpserver",
     "pytest",
+    "rangehttpserver",
     "pytest-benchmark",
     "rasterio>=1.4.0",
 ]

@@ -24,7 +24,7 @@ dependencies = [
     "diskcache",
     "attrs",
     "cachetools",
-    "obstore>=0.3.0,<0.4",
+    "obstore>=0.4,<0.5",
     "pydantic",
     "pydantic-settings",
 ]

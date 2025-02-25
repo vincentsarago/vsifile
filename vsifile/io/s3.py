@@ -50,6 +50,7 @@ class AWSS3Reader(BaseReader):
 
         config = {}
         keys = {k.upper() for k in list(self.config)}
+
         endpoint_url = os.environ.get("AWS_S3_ENDPOINT", None)
         use_https = os.environ.get("AWS_HTTPS", "YES")
         if not {"AWS_ENDPOINT_URL", "AWS_ENDPOINT"}.intersection(keys) and endpoint_url:
@@ -77,8 +78,9 @@ class AWSS3Reader(BaseReader):
             "aws_default_region",
             "default_region",
         ]
-        region_name_config = next((config[k] for k in region_keys if k in config), None)
-
+        region_name_config = next(
+            (self.config[k] for k in region_keys if k in self.config), None
+        )
         if self.infer_region and not region_name_config:
             config["AWS_REGION"] = _find_bucket_region(bucket) or region_name_env
 

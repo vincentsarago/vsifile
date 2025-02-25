@@ -205,6 +205,8 @@ class BaseReader(metaclass=abc.ABCMeta):
         sizes: List[int],
     ) -> List[bytes]:
         """Read multiple ranges."""
+        logger.debug("VSIFILE: Using MultiRange Reads")
+
         ends = [offset + size for offset, size in zip(offsets, sizes)]
         ranges = [f"{s}-{e}" for s, e in zip(offsets, ends)]
         logger.debug(f"VSIFILE: Downloading: {', '.join(ranges)}")

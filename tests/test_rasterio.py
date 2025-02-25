@@ -25,7 +25,7 @@ def test_rasterio_opener(caplog):
     assert [
         rec.message
         for rec in caplog.records
-        if rec.message.startswith("Using MultiRange Reads")
+        if "VSIFILE: Using MultiRange Reads" in rec.message
     ]
 
 
@@ -45,5 +45,5 @@ def test_rasterio_without_multi_range(caplog):
     assert not [
         rec.message
         for rec in caplog.records
-        if rec.message.startswith("Using MultiRange Reads")
+        if "VSIFILE: Using MultiRange Reads" in rec.message
     ]

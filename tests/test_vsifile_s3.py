@@ -1,14 +1,11 @@
 """test vsifile.AWSS3Reader."""
 
 import datetime
-import os
 
 import pytest
 
 from vsifile import VSIFile
 from vsifile.io import AWSS3Reader
-
-fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures")
 
 s3_url = "s3://sentinel-cogs/sentinel-s2-l2a-cogs/15/T/VK/2023/10/S2B_15TVK_20231008_0_L2A/TCI.tif"
 

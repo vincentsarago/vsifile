@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1728632810625,
+  "lastUpdate": 1740515383668,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -494,6 +494,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.011545107722027683",
             "extra": "mean: 39.799376420000385 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ac559befc5291d1ec415348443a0dd9e054ffb82",
+          "message": "Merge pull request #15 from vincentsarago/feature/switch-to-obstore\n\nswitch to obstore",
+          "timestamp": "2025-02-25T21:28:32+01:00",
+          "tree_id": "dc9ec4c5c814f696d5b4a1a8592e10df7e8f12a6",
+          "url": "https://github.com/vincentsarago/vsifile/commit/ac559befc5291d1ec415348443a0dd9e054ffb82"
+        },
+        "date": 1740515383251,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 100.15836700453958,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0034078871754577708",
+            "extra": "mean: 9.984188339998354 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 63.07450625592533,
+            "unit": "iter/sec",
+            "range": "stddev: 0.004824159440796757",
+            "extra": "mean: 15.854265999998347 msec\nrounds: 50"
           }
         ]
       }

@@ -70,7 +70,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         ...
 
     def _get_header(self) -> bytes:
-        logger.debug("VSIFILE_INFO: HEAD")
+        logger.debug("VSIFILE_INFO: HEAD (Open)")
         head = obs.head(self._store, self._key)
         self._size = head["size"]
 
@@ -126,7 +126,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     @cached_property
     def mtime(self) -> datetime.datetime:
         """return file modified date."""
-        logger.debug("VSIFILE_INFO: HEAD")
+        logger.debug("VSIFILE_INFO: HEAD (mtime)")
         head = obs.head(self._store, self._key)
         return head["last_modified"]
 
@@ -138,7 +138,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     @cached_property
     def seekable(self) -> bool:
         """file seekable."""
-        logger.debug("VSIFILE_INFO: HEAD")
+        logger.debug("VSIFILE_INFO: HEAD (seekable)")
         return obs.head(self._store, self._key) is not None
 
     def seek(self, loc: int, whence: int = 0) -> int:

@@ -10,10 +10,12 @@ from attrs import define, field
 from obstore.store import S3Store
 
 from vsifile.io.base import BaseReader
+from vsifile.logger import logger
 
 
 def _find_bucket_region(bucket: str) -> Optional[str]:
     try:
+        logger.debug("VSIFILE_INFO_HEADER_OUT: GET")
         response = urllib.request.urlopen(f"https://{bucket}.s3.amazonaws.com")
         return response.getheader("x-amz-bucket-region")
     except urllib.error.HTTPError:

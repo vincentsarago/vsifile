@@ -70,23 +70,21 @@ class BaseReader(metaclass=abc.ABCMeta):
         ...
 
     def _get_header(self) -> bytes:
+        logger.debug("VSIFILE_INFO_HEADER_OUT: HEAD")
         head = obs.head(self._store, self._key)
         self._size = head["size"]
 
         header = self.header_cache.get(f"{self.name}-header", read=True)
         if not header:
-            logger.debug("Adding Header in cache")
-            header = bytes(
-                obs.get_range(
-                    self._store,
-                    self._key,
-                    start=0,
-                    end=vsi_settings.ingested_bytes_at_open
-                    if self._size > vsi_settings.ingested_bytes_at_open
-                    else self._size,
-                )
+            end = (
+                vsi_settings.ingested_bytes_at_open
+                if self._size > vsi_settings.ingested_bytes_at_open
+                else self._size
             )
+            logger.debug(f"VSIFILE: Downloading: 0-{end}")
+            header = bytes(obs.get_range(self._store, self._key, start=0, end=end))
 
+            logger.debug("VSIFILE: Adding Header in cache")
             self.header_cache.set(
                 f"{self.name}-header",
                 header,
@@ -97,12 +95,12 @@ class BaseReader(metaclass=abc.ABCMeta):
             return header
 
         else:
-            logger.debug("Found Header in cache")
+            logger.debug("VSIFILE: Found Header in cache")
             return header.read()
 
     def __enter__(self):
         """Open file and fetch header."""
-        logger.debug(f"Opening: {self.name} (mode: {self.mode})")
+        logger.debug(f"VSIFILE: Opening {self.name} (mode: {self.mode})")
         self._closed = False
         self.header = self._get_header()
         return self
@@ -127,6 +125,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     @cached_property
     def mtime(self) -> datetime.datetime:
         """return file modified date."""
+        logger.debug("VSIFILE_INFO_HEADER_OUT: HEAD")
         head = obs.head(self._store, self._key)
         return head["last_modified"]
 
@@ -138,6 +137,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     @cached_property
     def seekable(self) -> bool:
         """file seekable."""
+        logger.debug("VSIFILE_INFO_HEADER_OUT: HEAD")
         return obs.head(self._store, self._key) is not None
 
     def seek(self, loc: int, whence: int = 0) -> int:
@@ -168,7 +168,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         # TODO: maybe check if gdal is trying to make a bigger header request?
         loc = self.tell()
         if loc + length <= len(self.header):
-            logger.debug(f"Reading {loc}->{loc+length} from Header cache")
+            logger.debug(f"VSIFILE: Reading {loc}->{loc+length} from Header cache")
             _ = self.seek(loc + length, 0)
             return self.header[loc : loc + length]
 
@@ -188,7 +188,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     )
     def get_byte_range(self, offset, size) -> bytes:
         """Read range."""
-        logger.debug(f"Fetching {offset}->{offset + size} range")
+        logger.debug(f"VSIFILE: Downloading: {offset}-{offset + size}")
         self._loc += size
         return bytes(
             obs.get_range(
@@ -207,7 +207,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         """Read multiple ranges."""
         ends = [offset + size for offset, size in zip(offsets, sizes)]
         ranges = [f"{s}-{e}" for s, e in zip(offsets, ends)]
-        logger.debug(f"Using MultiRange Reads for {ranges}")
+        logger.debug(f"VSIFILE: Downloading: {', '.join(ranges)}")
 
         self._loc = offsets[-1] + sizes[-1]
 

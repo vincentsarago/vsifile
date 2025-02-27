@@ -18,13 +18,14 @@ class VSIOpener:
 
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """init."""
         self._obj = VSIFile
+        self._kwargs = kwargs
 
     def open(self, path, mode="rb", **kwds) -> BaseReader:
         """Return Obj."""
-        return self._obj(path, mode=mode, **kwds)
+        return self._obj(path, mode=mode, **kwds, **self._kwargs)
 
     def isfile(self, path) -> bool:
         """isfile."""

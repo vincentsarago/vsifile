@@ -3,9 +3,11 @@
 import datetime
 
 import pytest
+import rasterio
 
 from vsifile import VSIFile
 from vsifile.io import AWSS3Reader
+from vsifile.rasterio import VSIOpener
 
 s3_url = "s3://sentinel-cogs/sentinel-s2-l2a-cogs/15/T/VK/2023/10/S2B_15TVK_20231008_0_L2A/TCI.tif"
 
@@ -62,3 +64,16 @@ def test_vsifile_s3():
         assert isinstance(f.mtime, datetime.datetime)
 
     assert f.closed
+
+
+def test_vsifile_s3_rasterio():
+    """Test VSIFile Local File reader."""
+    with pytest.raises(rasterio.errors.RasterioIOError):
+        with rasterio.open(s3_url, opener=VSIOpener()):
+            pass
+
+    with rasterio.open(
+        s3_url,
+        opener=VSIOpener(config={"skip_signature": True, "aws_region": "us-west-2"}),
+    ):
+        pass

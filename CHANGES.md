@@ -1,3 +1,29 @@
+
+# Unreleased
+
+* add `kwargs` to `vsifile.rasterio.VSIOpener` class to forward configurations (config, client_config, retry_config) to the `obstore.Store`
+
+    ```python
+    import rasterio
+    from vsifile.rasterio import VSIOpener
+
+    # This would fail if not AWS credentials are found
+    with rasterio.open(
+        "s3://sentinel-cogs/sentinel-s2-l2a-cogs/15/T/VK/2023/10/S2B_15TVK_20231008_0_L2A/TCI.tif",
+        opener=VSIOpener()
+    ):
+        pass
+
+    # We forward `skip_signature` to Obstore.store.S3Store creation
+    with rasterio.open(
+        "s3://sentinel-cogs/sentinel-s2-l2a-cogs/15/T/VK/2023/10/S2B_15TVK_20231008_0_L2A/TCI.tif",
+        opener=VSIOpener(
+            config={"skip_signature": True, "aws_region": "us-west-2"}
+        ),
+    ):
+        ...
+    ```
+
 # 0.2.0 (2025-02-26)
 
 * switch to `Obstore` for I/O (https://github.com/vincentsarago/vsifile/pull/15)

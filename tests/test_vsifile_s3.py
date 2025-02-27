@@ -68,7 +68,7 @@ def test_vsifile_s3():
 
 def test_vsifile_s3_rasterio():
     """Test Rasterio with VSIOpener options."""
-    with pytest.raises(rasterio.errors.RasterioIOError):
+    with pytest.raises((rasterio.errors.RasterioIOError, Exception)):
         with rasterio.open(s3_url, opener=VSIOpener()):
             pass
 

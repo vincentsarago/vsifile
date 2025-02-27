@@ -3,7 +3,7 @@
 import os
 import urllib.error
 import urllib.request
-from typing import Dict, Optional
+from typing import Optional
 from urllib.parse import urlparse
 
 from attrs import define, field
@@ -31,9 +31,6 @@ class AWSS3Reader(BaseReader):
     requester_pays: bool = field(
         factory=lambda: os.environ.get("AWS_REQUEST_PAYER", "").lower() == "requester"
     )
-    config: Dict = field(factory=dict)
-    client_options: Dict = field(factory=dict)
-    retry_config: Optional[Dict] = field(default=None)
     infer_region: bool = field(default=True)
 
     def __repr__(self) -> str:
@@ -51,6 +48,7 @@ class AWSS3Reader(BaseReader):
         self._key = parsed.path.strip("/")
 
         config = {}
+        s3_config = self.config or {}
         keys = {k.upper() for k in list(self.config)}
 
         endpoint_url = os.environ.get("AWS_S3_ENDPOINT", None)
@@ -64,7 +62,8 @@ class AWSS3Reader(BaseReader):
                 config["AWS_ENDPOINT_URL"] = "http://" + endpoint_url
 
         options = {}
-        keys = [k.upper() for k in list(self.client_options)]
+        client_options = self.client_options or {}
+        keys = [k.upper() for k in list(client_options)]
         if "ALLOW_HTTP" not in keys and use_https in ["NO", "FALSE", "OFF"]:
             options["ALLOW_HTTP"] = "TRUE"
 
@@ -81,15 +80,15 @@ class AWSS3Reader(BaseReader):
             "default_region",
         ]
         region_name_config = next(
-            (self.config[k] for k in region_keys if k in self.config), None
+            (s3_config[k] for k in region_keys if k in s3_config), None
         )
         if self.infer_region and not region_name_config:
             config["AWS_REGION"] = _find_bucket_region(bucket) or region_name_env
 
         self._store = S3Store(
             bucket,
-            config={**self.config, **config},
-            client_options={**self.client_options, **options},
+            config={**s3_config, **config},
+            client_options={**client_options, **options},
             retry_config=self.retry_config,
         )
 

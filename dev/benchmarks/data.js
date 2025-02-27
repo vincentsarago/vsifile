@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1740528551021,
+  "lastUpdate": 1740690733402,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -684,6 +684,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.005122484705631232",
             "extra": "mean: 15.802498500000297 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7e1671761933424c3ace4b42947bab0faa5ad12f",
+          "message": "Merge pull request #19 from vincentsarago/feature/allow-rasterio-opener-config\n\nFeature/allow rasterio opener config",
+          "timestamp": "2025-02-27T22:10:54+01:00",
+          "tree_id": "d6cd3b64ecc0aafaa0c96027a3cd2639fdbbc842",
+          "url": "https://github.com/vincentsarago/vsifile/commit/7e1671761933424c3ace4b42947bab0faa5ad12f"
+        },
+        "date": 1740690733128,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 96.41705321323307,
+            "unit": "iter/sec",
+            "range": "stddev: 0.003780456904707553",
+            "extra": "mean: 10.371609240000623 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 60.1083697163705,
+            "unit": "iter/sec",
+            "range": "stddev: 0.007827980752012883",
+            "extra": "mean: 16.63661823999945 msec\nrounds: 50"
           }
         ]
       }

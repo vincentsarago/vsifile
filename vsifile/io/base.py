@@ -82,7 +82,7 @@ class BaseReader(metaclass=abc.ABCMeta):
             )
 
             meta = response.meta
-            header = bytes(response.bytes())
+            header = response.bytes().to_bytes()
 
             logger.debug("VSIFILE: Adding Header in cache")
             self.header_cache.set(
@@ -192,14 +192,12 @@ class BaseReader(metaclass=abc.ABCMeta):
         logger.debug("VSIFILE_INFO: GET")
         logger.debug(f"VSIFILE: Downloading: {offset}-{offset + size}")
         self._loc += size
-        return bytes(
-            obs.get_range(
-                self._store,
-                self._key,
-                start=offset,
-                end=offset + size,
-            )
-        )
+        return obs.get_range(
+            self._store,
+            self._key,
+            start=offset,
+            end=offset + size,
+        ).to_bytes()
 
     def get_byte_ranges(
         self,
@@ -218,6 +216,6 @@ class BaseReader(metaclass=abc.ABCMeta):
 
         # TODO add blocks in cache
         return [
-            bytes(buff)
+            buff.to_bytes()
             for buff in obs.get_ranges(self._store, self._key, starts=offsets, ends=ends)
         ]

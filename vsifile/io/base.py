@@ -18,8 +18,14 @@ from vsifile.logger import logger
 from vsifile.settings import VSISettings
 
 if TYPE_CHECKING:
-    from obstore.store import ObjectStore
-
+    from obstore.store import (
+        AzureConfigInput,
+        ClientConfig,
+        GCSConfigInput,
+        ObjectStore,
+        RetryConfig,
+        S3ConfigInput,
+    )
 
 vsi_settings = VSISettings()
 
@@ -49,6 +55,10 @@ class BaseReader(metaclass=abc.ABCMeta):
 
     name: str = field()
     mode: str = field(default="rb", validator=_check_mode)
+
+    config: S3ConfigInput | GCSConfigInput | AzureConfigInput | None = field(default=None)
+    client_options: ClientConfig | None = field(default=None)
+    retry_config: RetryConfig | None = field(default=None)
 
     header: bytes = field(init=False)
     header_cache: Cache = field(init=False, factory=lambda: header_cache)

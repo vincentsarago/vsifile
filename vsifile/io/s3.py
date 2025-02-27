@@ -12,9 +12,10 @@ from vsifile.io.base import BaseReader
 from vsifile.logger import logger
 
 
-def _find_bucket_region(bucket: str) -> Optional[str]:
+def _find_bucket_region(bucket: str, use_https: bool = True) -> Optional[str]:
     logger.debug("VSIFILE_INFO_HEADER_OUT: GET")
-    response = httpx.get(f"https://{bucket}.s3.amazonaws.com")
+    prefix = "https" if use_https else "http"
+    response = httpx.get(f"{prefix}://{bucket}.s3.amazonaws.com")
     return response.headers.get("x-amz-bucket-region")
 
 
@@ -44,7 +45,7 @@ class AWSS3Reader(BaseReader):
         # AWS_S3_ENDPOINT and AWS_HTTPS are GDAL config options of vsis3 driver
         # https://gdal.org/user/virtual_file_systems.html#vsis3-aws-s3-files
         endpoint_url = os.environ.get("AWS_S3_ENDPOINT", None)
-        use_https = os.environ.get("AWS_HTTPS", "YES")
+        use_https = os.environ.get("AWS_HTTPS", "YES") in ["YES", "TRUE", "ON"]
         region_name_env = (
             os.environ.get("AWS_REGION", os.environ.get("AWS_DEFAULT_REGION")) or None
         )
@@ -53,7 +54,7 @@ class AWSS3Reader(BaseReader):
         options = {}
         client_options = self.client_options or {}
         keys = [k.upper() for k in list(client_options)]
-        if "ALLOW_HTTP" not in keys and use_https in ["NO", "FALSE", "OFF"]:
+        if "ALLOW_HTTP" not in keys and not use_https:
             options["ALLOW_HTTP"] = "TRUE"
 
         # config: obstore.store.S3Config | obstore.store.S3ConfigInput
@@ -69,10 +70,9 @@ class AWSS3Reader(BaseReader):
             "endpoint",
         }
         if not endpoint_keys.intersection(s3_config) and endpoint_url:
-            if use_https.upper() in ["YES", "TRUE", "ON"]:
-                config["aws_endpoint_url"] = "https://" + endpoint_url
-            else:
-                config["aws_endpoint_url"] = "http://" + endpoint_url
+            config["aws_endpoint_url"] = (
+                "https://" + endpoint_url if use_https else "http://" + endpoint_url
+            )
 
         requester_pays_keys = {
             "AWS_REQUEST_PAYER",
@@ -93,7 +93,9 @@ class AWSS3Reader(BaseReader):
         }
         if not region_keys.intersection(s3_config) and self.infer_region:
             # infer region or fallback to env variables
-            config["aws_region"] = _find_bucket_region(bucket) or region_name_env
+            config["aws_region"] = (
+                _find_bucket_region(bucket, use_https) or region_name_env
+            )
 
         self._store = S3Store(
             bucket,

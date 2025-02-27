@@ -13,7 +13,7 @@ s3_url = "s3://sentinel-cogs/sentinel-s2-l2a-cogs/15/T/VK/2023/10/S2B_15TVK_2023
 
 
 def test_vsifile_s3():
-    """Test VSIFile Local File reader."""
+    """Test VSIFile S3 store."""
     config = {"skip_signature": True, "aws_region": "us-west-2"}
     with pytest.raises(ValueError):
         with VSIFile(s3_url, "r", config=config) as f:
@@ -67,7 +67,7 @@ def test_vsifile_s3():
 
 
 def test_vsifile_s3_rasterio():
-    """Test VSIFile Local File reader."""
+    """Test Rasterio with VSIOpener options."""
     with pytest.raises(rasterio.errors.RasterioIOError):
         with rasterio.open(s3_url, opener=VSIOpener()):
             pass

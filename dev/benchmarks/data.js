@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1740690733402,
+  "lastUpdate": 1740733956707,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -722,6 +722,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.007827980752012883",
             "extra": "mean: 16.63661823999945 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "570436d9d997bb90ccdeefe1f406765e521ca173",
+          "message": "Merge pull request #18 from vincentsarago/feature/no-more-heads\n\nremove HEAD requests",
+          "timestamp": "2025-02-28T10:11:12+01:00",
+          "tree_id": "f9e339fd35800c7181b1080666d75c9be2c6ef0a",
+          "url": "https://github.com/vincentsarago/vsifile/commit/570436d9d997bb90ccdeefe1f406765e521ca173"
+        },
+        "date": 1740733955836,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 100.69288566959902,
+            "unit": "iter/sec",
+            "range": "stddev: 0.003540581204217653",
+            "extra": "mean: 9.931188220002696 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 68.21996700442638,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0033526212019307946",
+            "extra": "mean: 14.658465020000904 msec\nrounds: 50"
           }
         ]
       }

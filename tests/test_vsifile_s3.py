@@ -1,9 +1,11 @@
 """test vsifile.AWSS3Reader."""
 
 import datetime
+from unittest.mock import patch
 
 import pytest
 import rasterio
+from diskcache import Cache
 
 from vsifile import VSIFile
 from vsifile.io import AWSS3Reader
@@ -68,12 +70,14 @@ def test_vsifile_s3():
 
 def test_vsifile_s3_rasterio():
     """Test Rasterio with VSIOpener options."""
-    with pytest.raises((rasterio.errors.RasterioIOError, Exception)):
-        with rasterio.open(s3_url, opener=VSIOpener()) as src:
-            assert src.meta
+    cache = Cache(directory=None, size_limit=0)
+    with patch("vsifile.io.base.header_cache", new=cache):
+        with pytest.raises((rasterio.errors.RasterioIOError, Exception)):
+            with rasterio.open(s3_url, opener=VSIOpener()) as src:
+                assert src.meta
 
-    with rasterio.open(
-        s3_url,
-        opener=VSIOpener(config={"skip_signature": True, "aws_region": "us-west-2"}),
-    ):
-        pass
+        with rasterio.open(
+            s3_url,
+            opener=VSIOpener(config={"skip_signature": True, "aws_region": "us-west-2"}),
+        ) as src:
+            assert src.meta

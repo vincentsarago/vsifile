@@ -104,3 +104,19 @@ def test_vsifile_header_cache(caplog, tmp_path):
                 assert len(f.header) == 32768
             messages = [rec.message for rec in caplog.records]
             assert "VSIFILE: Adding Header in cache" in messages
+
+    # Disable Cache
+    cache = Cache(directory=None, size_limit=0)
+    with patch("vsifile.io.base.header_cache", new=cache):
+        # Patch TTL Cache settings
+        with patch.object(vsi_settings, "cache_headers_ttl", new=0):
+            with VSIFile(cog, "rb") as f:
+                assert len(f.header) == 32768
+            messages = [rec.message for rec in caplog.records]
+            assert "VSIFILE: Adding Header in cache" in messages
+
+            caplog.clear()
+            with VSIFile(cog, "rb") as f:
+                assert len(f.header) == 32768
+            messages = [rec.message for rec in caplog.records]
+            assert "VSIFILE: Adding Header in cache" in messages

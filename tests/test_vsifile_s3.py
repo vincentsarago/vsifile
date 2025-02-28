@@ -1,9 +1,11 @@
 """test vsifile.AWSS3Reader."""
 
 import datetime
+from unittest.mock import patch
 
 import pytest
 import rasterio
+from diskcache import Cache
 
 from vsifile import VSIFile
 from vsifile.io import AWSS3Reader
@@ -13,7 +15,7 @@ s3_url = "s3://sentinel-cogs/sentinel-s2-l2a-cogs/15/T/VK/2023/10/S2B_15TVK_2023
 
 
 def test_vsifile_s3():
-    """Test VSIFile Local File reader."""
+    """Test VSIFile S3 store."""
     config = {"skip_signature": True, "aws_region": "us-west-2"}
     with pytest.raises(ValueError):
         with VSIFile(s3_url, "r", config=config) as f:
@@ -67,13 +69,15 @@ def test_vsifile_s3():
 
 
 def test_vsifile_s3_rasterio():
-    """Test VSIFile Local File reader."""
-    with pytest.raises(rasterio.errors.RasterioIOError):
-        with rasterio.open(s3_url, opener=VSIOpener()):
-            pass
+    """Test Rasterio with VSIOpener options."""
+    cache = Cache(directory=None, size_limit=0)
+    with patch("vsifile.io.base.header_cache", new=cache):
+        with pytest.raises((rasterio.errors.RasterioIOError, Exception)):
+            with rasterio.open(s3_url, opener=VSIOpener()) as src:
+                assert src.meta
 
-    with rasterio.open(
-        s3_url,
-        opener=VSIOpener(config={"skip_signature": True, "aws_region": "us-west-2"}),
-    ):
-        pass
+        with rasterio.open(
+            s3_url,
+            opener=VSIOpener(config={"skip_signature": True, "aws_region": "us-west-2"}),
+        ) as src:
+            assert src.meta

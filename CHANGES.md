@@ -1,5 +1,9 @@
 
-# Unreleased
+# 0.3.0 (2025-02-28)
+
+* replace `HEAD` with `GET` request on file opening
+
+* cache `header` and file `metadata` to the *Header Cache*
 
 * add `kwargs` to `vsifile.rasterio.VSIOpener` class to forward configurations (config, client_config, retry_config) to the `obstore.Store`
 
@@ -7,7 +11,7 @@
     import rasterio
     from vsifile.rasterio import VSIOpener
 
-    # This would fail if not AWS credentials are found
+    # This would fail if no AWS credentials are found
     with rasterio.open(
         "s3://sentinel-cogs/sentinel-s2-l2a-cogs/15/T/VK/2023/10/S2B_15TVK_20231008_0_L2A/TCI.tif",
         opener=VSIOpener()

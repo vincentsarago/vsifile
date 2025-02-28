@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import datetime
-from functools import cached_property
 from threading import Lock
 from typing import TYPE_CHECKING, List
 
@@ -68,6 +67,8 @@ class BaseReader(metaclass=abc.ABCMeta):
     _loc: int = field(init=False, default=0)
     _closed: bool = field(init=False, default=True)
     _size: int = field(init=False)
+    _mtime: datetime.datetime = field(init=False)
+    _seekable: bool = field(init=False, default=False)
 
     @abc.abstractmethod
     def __repr__(self) -> str:
@@ -80,34 +81,36 @@ class BaseReader(metaclass=abc.ABCMeta):
         ...
 
     def _get_header(self) -> bytes:
-        logger.debug("VSIFILE_INFO: HEAD (Open)")
-        head = obs.head(self._store, self._key)
-        self._size = head["size"]
-
-        header = self.header_cache.get(f"{self.name}-header", read=True)
-        if not header:
-            end = (
-                vsi_settings.ingested_bytes_at_open
-                if self._size > vsi_settings.ingested_bytes_at_open
-                else self._size
-            )
+        cache = self.header_cache.get(f"{self.name}-header", read=True)
+        if not cache:
             logger.debug("VSIFILE_INFO: GET")
-            logger.debug(f"VSIFILE: Downloading: 0-{end}")
-            header = bytes(obs.get_range(self._store, self._key, start=0, end=end))
+            logger.debug(f"VSIFILE: Downloading: 0-{vsi_settings.ingested_bytes_at_open}")
+            response = obs.get(
+                self._store,
+                self._key,
+                options={"range": (0, vsi_settings.ingested_bytes_at_open)},
+            )
+
+            meta = response.meta
+            header = response.bytes().to_bytes()
 
             logger.debug("VSIFILE: Adding Header in cache")
             self.header_cache.set(
                 f"{self.name}-header",
-                header,
+                (header, meta),
                 expire=vsi_settings.cache_headers_ttl,
-                read=True,
                 tag="data",
             )
-            return header
 
         else:
             logger.debug("VSIFILE: Found Header in cache")
-            return header.read()
+            header, meta = cache
+
+        self._size = meta["size"]
+        self._mtime = meta["last_modified"]
+        self._seekable = True
+
+        return header
 
     def __enter__(self):
         """Open file and fetch header."""
@@ -133,23 +136,20 @@ class BaseReader(metaclass=abc.ABCMeta):
         """Closed?"""
         return self._closed
 
-    @cached_property
+    @property
     def mtime(self) -> datetime.datetime:
         """return file modified date."""
-        logger.debug("VSIFILE_INFO: HEAD (mtime)")
-        head = obs.head(self._store, self._key)
-        return head["last_modified"]
+        return self._mtime
 
     @property
     def size(self) -> int:
         """return file size."""
         return self._size
 
-    @cached_property
+    @property
     def seekable(self) -> bool:
         """file seekable."""
-        logger.debug("VSIFILE_INFO: HEAD (seekable)")
-        return obs.head(self._store, self._key) is not None
+        return self._seekable
 
     def seek(self, loc: int, whence: int = 0) -> int:
         """Change stream position."""
@@ -202,14 +202,12 @@ class BaseReader(metaclass=abc.ABCMeta):
         logger.debug("VSIFILE_INFO: GET")
         logger.debug(f"VSIFILE: Downloading: {offset}-{offset + size}")
         self._loc += size
-        return bytes(
-            obs.get_range(
-                self._store,
-                self._key,
-                start=offset,
-                end=offset + size,
-            )
-        )
+        return obs.get_range(
+            self._store,
+            self._key,
+            start=offset,
+            end=offset + size,
+        ).to_bytes()
 
     def get_byte_ranges(
         self,
@@ -228,6 +226,6 @@ class BaseReader(metaclass=abc.ABCMeta):
 
         # TODO add blocks in cache
         return [
-            bytes(buff)
+            buff.to_bytes()
             for buff in obs.get_ranges(self._store, self._key, starts=offsets, ends=ends)
         ]

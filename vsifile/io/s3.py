@@ -27,6 +27,7 @@ class AWSS3Reader(BaseReader):
         factory=lambda: os.environ.get("AWS_REQUEST_PAYER", "").lower() == "requester"
     )
     infer_region: bool = field(default=True)
+    store: S3Store = field(init=False)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -97,7 +98,7 @@ class AWSS3Reader(BaseReader):
                 _find_bucket_region(bucket, use_https) or region_name_env
             )
 
-        self._store = S3Store(
+        self.store = S3Store(
             bucket,
             config={**s3_config, **config},
             client_options={**client_options, **options},

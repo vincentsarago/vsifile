@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import abc
 import datetime
 from threading import Lock
 from typing import TYPE_CHECKING, List
@@ -49,12 +48,13 @@ def _check_mode(instance, attribute, value):
 
 
 @define
-class BaseReader(metaclass=abc.ABCMeta):
+class BaseReader:
     """Abstract Base class for VSIFILE Reader."""
 
     name: str = field()
     mode: str = field(default="rb", validator=_check_mode)
 
+    store: ObjectStore | None = field(default=None)
     config: S3ConfigInput | GCSConfigInput | AzureConfigInput | None = field(default=None)
     client_options: ClientConfig | None = field(default=None)
     retry_config: RetryConfig | None = field(default=None)
@@ -63,22 +63,29 @@ class BaseReader(metaclass=abc.ABCMeta):
     header_cache: Cache = field(init=False, factory=lambda: header_cache)
 
     _key: str = field(init=False)
-    _store: ObjectStore = field(init=False)
     _loc: int = field(init=False, default=0)
     _closed: bool = field(init=False, default=True)
     _size: int = field(init=False)
     _mtime: datetime.datetime = field(init=False)
     _seekable: bool = field(init=False, default=False)
 
-    @abc.abstractmethod
+    def __attrs_post_init__(self):
+        """init class."""
+        self.store = self.store or obs.store.from_url(
+            self.name,
+            config=self.config,
+            client_options=self.client_options,
+            retry_config=self.retry_config,
+        )
+        self._key = ""
+
     def __repr__(self) -> str:
         """Reader repr."""
-        ...
+        return f"{self.__class__.__name__}({self.name})"
 
-    @abc.abstractmethod
     def __hash__(self):
         """Object hash."""
-        ...
+        return hash((self.name, self.mode))
 
     def _get_header(self) -> bytes:
         cache = self.header_cache.get(f"{self.name}-header", read=True)
@@ -86,7 +93,7 @@ class BaseReader(metaclass=abc.ABCMeta):
             logger.debug("VSIFILE_INFO: GET")
             logger.debug(f"VSIFILE: Downloading: 0-{vsi_settings.ingested_bytes_at_open}")
             response = obs.get(
-                self._store,
+                self.store,
                 self._key,
                 options={"range": (0, vsi_settings.ingested_bytes_at_open)},
             )
@@ -203,7 +210,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         logger.debug(f"VSIFILE: Downloading: {offset}-{offset + size}")
         self._loc += size
         return obs.get_range(
-            self._store,
+            self.store,
             self._key,
             start=offset,
             end=offset + size,
@@ -227,5 +234,5 @@ class BaseReader(metaclass=abc.ABCMeta):
         # TODO add blocks in cache
         return [
             buff.to_bytes()
-            for buff in obs.get_ranges(self._store, self._key, starts=offsets, ends=ends)
+            for buff in obs.get_ranges(self.store, self._key, starts=offsets, ends=ends)
         ]

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from attrs import define
+from attrs import define, field
 from obstore.store import LocalStore
 
 from vsifile.io.base import BaseReader
@@ -12,9 +12,11 @@ from vsifile.io.base import BaseReader
 class FileReader(BaseReader):
     """Local File VSIFILE Reader."""
 
+    store: LocalStore = field(init=False)
+
     def __attrs_post_init__(self):
         """Create Store and parse name."""
-        self._store = LocalStore()
+        self.store = LocalStore()
         self._key = str(Path(self.name.replace("file://", "")).resolve())
 
     def __repr__(self) -> str:

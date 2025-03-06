@@ -1,6 +1,6 @@
 """HTTP VSIFile reader"""
 
-from attrs import define
+from attrs import define, field
 from obstore.store import HTTPStore
 
 from vsifile.io.base import BaseReader
@@ -9,6 +9,8 @@ from vsifile.io.base import BaseReader
 @define
 class HttpReader(BaseReader):
     """HTTP VSIFILE Reader."""
+
+    store: HTTPStore = field(init=False)
 
     def __repr__(self) -> str:
         """Reader repr."""
@@ -26,7 +28,7 @@ class HttpReader(BaseReader):
         if "ALLOW_HTTP" not in keys and self.name.startswith("http://"):
             options["ALLOW_HTTP"] = "TRUE"
 
-        self._store = HTTPStore.from_url(
+        self.store = HTTPStore.from_url(
             self.name,
             client_options={**client_options, **options},
             retry_config=self.retry_config,

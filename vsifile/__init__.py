@@ -1,7 +1,12 @@
 """vsifile."""
 
-from typing import Type
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Type
 from urllib.parse import urlparse
+
+if TYPE_CHECKING:
+    from obstore.store import ObjectStore
 
 from .io import AWSS3Reader, BaseReader, FileReader, HttpReader
 
@@ -14,7 +19,6 @@ def _get_filesystem_class(protocol) -> Type[BaseReader]:
         return HttpReader
 
     # TODO:
-    # - add s3
     # - add az
     # - add gs
 
@@ -31,8 +35,7 @@ def _get_filesystem_class(protocol) -> Type[BaseReader]:
         raise ValueError("'protocol' is not supported")
 
     # fallback to FileReader
-    else:
-        return FileReader
+    return FileReader
 
 
 def filesystem(protocol) -> Type[BaseReader]:
@@ -46,7 +49,12 @@ def from_uri(uri) -> Type[BaseReader]:
     return _get_filesystem_class(parsed.scheme)
 
 
-def VSIFile(uri: str, mode: str = "rb", **kwargs) -> BaseReader:
+def VSIFile(
+    uri: str, mode: str = "rb", store: ObjectStore | None = None, **kwargs
+) -> BaseReader:
     """TopLevel file Opener."""
+    if store:
+        return BaseReader(name=uri, mode=mode, store=store, **kwargs)  # type: ignore
+
     fs = from_uri(uri)
     return fs(name=uri, mode=mode, **kwargs)  # type: ignore

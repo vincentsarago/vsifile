@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1740734080036,
+  "lastUpdate": 1742389763873,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -798,6 +798,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.002561402990449777",
             "extra": "mean: 15.029995599998642 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e1e2e74dcd41aafb3dc4562f4b8b24e089e0b1cb",
+          "message": "Merge pull request #23 from vincentsarago/feature/upgrade-obstore0.5\n\nupdate obstore to 0.5",
+          "timestamp": "2025-03-19T14:07:52+01:00",
+          "tree_id": "f4f7580c4627b25c99930ebce4d68b4ba2f53913",
+          "url": "https://github.com/vincentsarago/vsifile/commit/e1e2e74dcd41aafb3dc4562f4b8b24e089e0b1cb"
+        },
+        "date": 1742389762864,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 95.94151448258157,
+            "unit": "iter/sec",
+            "range": "stddev: 0.003721623956023161",
+            "extra": "mean: 10.423016620000851 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 60.07987119010513,
+            "unit": "iter/sec",
+            "range": "stddev: 0.005989427100957496",
+            "extra": "mean: 16.64450971999912 msec\nrounds: 50"
           }
         ]
       }

@@ -7,7 +7,6 @@ import datetime
 from threading import Lock
 from typing import TYPE_CHECKING, List
 
-import obstore as obs
 from attrs import define, field
 from cachetools import TTLCache, cached
 from cachetools.keys import hashkey
@@ -85,8 +84,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         if not cache:
             logger.debug("VSIFILE_INFO: GET")
             logger.debug(f"VSIFILE: Downloading: 0-{vsi_settings.ingested_bytes_at_open}")
-            response = obs.get(
-                self._store,
+            response = self._store.get(
                 self._key,
                 options={"range": (0, vsi_settings.ingested_bytes_at_open)},
             )
@@ -202,8 +200,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         logger.debug("VSIFILE_INFO: GET")
         logger.debug(f"VSIFILE: Downloading: {offset}-{offset + size}")
         self._loc += size
-        return obs.get_range(
-            self._store,
+        return self._store.get_range(
             self._key,
             start=offset,
             end=offset + size,
@@ -227,5 +224,5 @@ class BaseReader(metaclass=abc.ABCMeta):
         # TODO add blocks in cache
         return [
             buff.to_bytes()
-            for buff in obs.get_ranges(self._store, self._key, starts=offsets, ends=ends)
+            for buff in self._store.get_ranges(self._key, starts=offsets, ends=ends)
         ]

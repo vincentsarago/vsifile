@@ -61,41 +61,17 @@ class AWSS3Reader(BaseReader):
         config = {}
         s3_config = self.config or {}
 
-        endpoint_keys = {
-            "AWS_ENDPOINT_URL",
-            "aws_endpoint_url",
-            "endpoint_url",
-            "AWS_ENDPOINT",
-            "aws_endpoint",
-            "endpoint",
-        }
-        if not endpoint_keys.intersection(s3_config) and endpoint_url:
-            config["aws_endpoint_url"] = (
+        if "endpoint" not in s3_config and endpoint_url:
+            config["endpoint"] = (
                 "https://" + endpoint_url if use_https else "http://" + endpoint_url
             )
 
-        requester_pays_keys = {
-            "AWS_REQUEST_PAYER",
-            "aws_request_payer",
-            "REQUEST_PAYER",
-            "request_payer",
-        }
-        if not requester_pays_keys.intersection(s3_config) and self.requester_pays:
-            config["aws_request_payer"] = True
+        if "request_payer" not in s3_config and self.requester_pays:
+            config["request_payer"] = True
 
-        region_keys = {
-            "AWS_DEFAULT_REGION",
-            "aws_default_region",
-            "default_region",
-            "AWS_REGION",
-            "aws_region",
-            "region",
-        }
-        if not region_keys.intersection(s3_config) and self.infer_region:
+        if "region" not in s3_config and self.infer_region:
             # infer region or fallback to env variables
-            config["aws_region"] = (
-                _find_bucket_region(bucket, use_https) or region_name_env
-            )
+            config["region"] = _find_bucket_region(bucket, use_https) or region_name_env
 
         self._store = S3Store(
             bucket,

@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 from .io import AWSS3Reader, BaseReader, FileReader, HttpReader
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 
 def _get_filesystem_class(protocol) -> Type[BaseReader]:

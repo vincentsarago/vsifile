@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1750858648868,
+  "lastUpdate": 1750859048952,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -912,6 +912,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.011940001165736885",
             "extra": "mean: 16.29019498000133 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "24a537ec902d22ad778d10dec00fe56b832a0440",
+          "message": "Merge pull request #26 from vincentsarago/update-obstore0.6\n\nupdate obstore req",
+          "timestamp": "2025-06-25T15:42:46+02:00",
+          "tree_id": "7a8f51005889207def19ce24fedd6297c14babfa",
+          "url": "https://github.com/vincentsarago/vsifile/commit/24a537ec902d22ad778d10dec00fe56b832a0440"
+        },
+        "date": 1750859048556,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 100.79682714166532,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0035812845099491932",
+            "extra": "mean: 9.920947200000114 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 68.52380250820703,
+            "unit": "iter/sec",
+            "range": "stddev: 0.006401867035279776",
+            "extra": "mean: 14.59346918000108 msec\nrounds: 50"
           }
         ]
       }

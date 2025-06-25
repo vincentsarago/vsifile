@@ -1,3 +1,9 @@
+
+# 0.4.1 (2025-06-25)
+
+* update Obstore requirements to `>=0.5,<0.7`
+* avoid pydantic settings errors to allow more env (author @lukasbindreiter)
+
 # 0.4.0 (2025-03-19)
 
 * update Obstore requirements to `>=0.5,<0.6`

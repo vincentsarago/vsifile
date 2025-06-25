@@ -27,6 +27,7 @@ class VSISettings(BaseSettings):
     model_config = {
         "env_prefix": "VSIFILE_",
         "env_file": ".env",
+        "extra": "ignore",
     }
 
     @model_validator(mode="after")

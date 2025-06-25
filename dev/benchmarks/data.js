@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1742390879938,
+  "lastUpdate": 1750858648868,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -874,6 +874,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.009724593962800423",
             "extra": "mean: 15.714176540000437 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "aaf10eed5eb4592061e4bc9cfc6fcd8146bf67d3",
+          "message": "Merge pull request #24 from lukasbindreiter/main\n\nIgnore unrelated variables in .env",
+          "timestamp": "2025-06-25T15:36:08+02:00",
+          "tree_id": "b417abcc0958e122a0f9faa5c290f412b447bed8",
+          "url": "https://github.com/vincentsarago/vsifile/commit/aaf10eed5eb4592061e4bc9cfc6fcd8146bf67d3"
+        },
+        "date": 1750858648416,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 103.43578274554763,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0035724706917091365",
+            "extra": "mean: 9.667834220001055 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 61.386619449776425,
+            "unit": "iter/sec",
+            "range": "stddev: 0.011940001165736885",
+            "extra": "mean: 16.29019498000133 msec\nrounds: 50"
           }
         ]
       }

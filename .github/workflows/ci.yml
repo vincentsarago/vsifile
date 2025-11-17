@@ -105,6 +105,7 @@ jobs:
       - name: Install dependencies
         run: |
           uv sync --group deploy
+          uv run hatch build 
 
       - name: Set tag version
         id: tag

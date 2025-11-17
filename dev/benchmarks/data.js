@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1750859187643,
+  "lastUpdate": 1763412100885,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -988,6 +988,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.013110171267807863",
             "extra": "mean: 17.381755779998684 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "856f95563e5cfbaca2e09e91452397bd938d8e93",
+          "message": "Merge pull request #27 from vincentsarago/feature/switch-to-uv\n\nswitch to UV",
+          "timestamp": "2025-11-17T21:40:22+01:00",
+          "tree_id": "092019900aeed6423f10409529342d6e37cb5693",
+          "url": "https://github.com/vincentsarago/vsifile/commit/856f95563e5cfbaca2e09e91452397bd938d8e93"
+        },
+        "date": 1763412100619,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 93.58044982973254,
+            "unit": "iter/sec",
+            "range": "stddev: 0.004082464618895644",
+            "extra": "mean: 10.685992659999783 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 57.655255475849316,
+            "unit": "iter/sec",
+            "range": "stddev: 0.002302665204712969",
+            "extra": "mean: 17.34447262000046 msec\nrounds: 50"
           }
         ]
       }

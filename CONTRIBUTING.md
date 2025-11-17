@@ -2,25 +2,29 @@
 
 Issues and pull requests are more than welcome.
 
+We recommand using [`uv`](https://docs.astral.sh/uv) as project manager for development.
+
+See https://docs.astral.sh/uv/getting-started/installation/ for installation 
+
 ### dev install
 
 ```bash
-$ git clone https://github.com/vincentsarago/vsifile.git
-$ cd vsifile
-$ python -m pip install -e .["dev"]
+git clone https://github.com/vincentsarago/vsifile.git
+cd vsifile
+
+uv sync
 ```
 
 You can then run the tests with the following command:
 
 ```sh
-python -m pytest --cov vsifile --cov-report term-missing -s -vv
+uv run pytest --cov vsifile --cov-report term-missing -s -vv
 ```
 
 ##### Performance tests
 
 ```sh
-python -m pip install -e ".[benchmark]"
-python -m pytest tests/benchmarks.py --benchmark-only --benchmark-columns 'min, max, mean, median' --benchmark-sort 'min'
+uv run --group benchmark pytest tests/benchmarks.py --benchmark-only --benchmark-columns 'min, max, mean, median' --benchmark-sort 'min'
 ```
 
 
@@ -29,5 +33,6 @@ python -m pytest tests/benchmarks.py --benchmark-only --benchmark-columns 'min, 
 This repo is set to use `pre-commit` to run *isort*, *mypy* and *ruff* when committing new code.
 
 ```bash
-$ pre-commit install
+uv run pre-commit install
+uv run pre-commit run --all-files 
 ```

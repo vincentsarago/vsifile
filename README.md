@@ -1,5 +1,20 @@
 # vsifile
 
+<p align="center">
+  <a href="https://github.com/vincentsarago/vsifile/actions?query=workflow%3ACI" target="_blank">
+      <img src="https://github.com/vincentsarago/vsifile/workflows/CI/badge.svg" alt="Test">
+  </a>
+  <a href="https://codecov.io/gh/vincentsarago/vsifile" target="_blank">
+      <img src="https://codecov.io/gh/vincentsarago/vsifile/branch/main/graph/badge.svg" alt="Coverage">
+  </a>
+  <a href="https://pypi.org/project/vsifile" target="_blank">
+      <img src="https://img.shields.io/pypi/v/vsifile?color=%2334D058&label=pypi%20package" alt="Package version">
+  </a>
+  <a href="https://github.com/vincentsarago/vsifile/blob/main/LICENSE" target="_blank">
+      <img src="https://img.shields.io/github/license/vincentsarago/vsifile.svg" alt="Downloads">
+  </a>
+</p>
+
 ---
 
 **Documentation**: <a href="https://vincentsarago.github.io/vsifile/" target="_blank">https://vincentsarago.github.io/vsifile/</a>

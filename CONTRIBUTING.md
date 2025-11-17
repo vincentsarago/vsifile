@@ -27,7 +27,6 @@ uv run pytest --cov vsifile --cov-report term-missing -s -vv
 uv run --group benchmark pytest tests/benchmarks.py --benchmark-only --benchmark-columns 'min, max, mean, median' --benchmark-sort 'min'
 ```
 
-
 ### pre-commit
 
 This repo is set to use `pre-commit` to run *isort*, *mypy* and *ruff* when committing new code.

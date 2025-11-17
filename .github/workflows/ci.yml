@@ -116,7 +116,7 @@ jobs:
         id: module
         run: |
           hatch --quiet version
-          echo "version=$(hatch --quiet version)" >> $GITHUB_OUTPUT
+          echo "version=$(uv hatch --quiet version)" >> $GITHUB_OUTPUT
 
       - name: Build and publish
         if: ${{ steps.tag.outputs.version }} == ${{ steps.module.outputs.version}}

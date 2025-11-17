@@ -16,33 +16,29 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version:
-        - '3.9'
-        - '3.10'
-        - '3.11'
-        - '3.12'
-        - '3.13'
+        python-version: ['3.11', '3.12', '3.13']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .["test"]
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.9.*" 
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
 
       - name: Run pre-commit
         if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
         run: |
-          python -m pip install pre-commit
-          pre-commit run --all-files
+          uv run pre-commit run --all-files
 
       - name: Run tests
-        run: python -m pytest --cov vsifile --cov-report xml --cov-report term-missing -s -vv
+        run: uv run pytest --cov vsifile --cov-report xml --cov-report term-missing -s -vv
 
       - name: Upload Results
         if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
@@ -57,19 +53,17 @@ jobs:
     needs: [tests]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      - uses: actions/checkout@v5
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[benchmark]"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.9.*" 
+          enable-cache: true
+          python-version: ${{ env.LATEST_PY_VERSION }}
 
       - name: Run Benchmark
-        run: python -m pytest tests/benchmarks.py --benchmark-only --benchmark-columns 'min, max, mean, median' --benchmark-sort 'min' --benchmark-json output.json
+        run: uv run --group benchmark pytest tests/benchmarks.py --benchmark-only --benchmark-columns 'min, max, mean, median' --benchmark-sort 'min' --benchmark-json output.json
         env:
            VSIFILE_CACHE_DIRECTORY: '/tmp/visfile-cache'
 
@@ -99,17 +93,18 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: '3.12'
+          version: "0.9.*" 
+          enable-cache: true
+          python-version: ${{ env.LATEST_PY_VERSION }}
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install hatch
-          python -m hatch build -t sdist
+          uv sync --group deploy
 
       - name: Set tag version
         id: tag

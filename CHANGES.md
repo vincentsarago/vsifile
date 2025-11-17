@@ -3,6 +3,7 @@
 
 * update Obstore requirements to `>=0.5,<0.9`
 * switch to UV for development
+* set minimum python version to `>=3.11`
 
 # 0.4.1 (2025-06-25)
 

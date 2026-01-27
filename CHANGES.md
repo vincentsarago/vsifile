@@ -1,4 +1,8 @@
 
+# 0.5.1 (2026-01-27)
+
+* add python 3.14 support
+
 # 0.5.0 (2025-11-17)
 
 * update Obstore requirements to `>=0.5,<0.9`

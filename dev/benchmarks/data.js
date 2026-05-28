@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1769515440721,
+  "lastUpdate": 1780002121795,
   "repoUrl": "https://github.com/vincentsarago/vsifile",
   "entries": {
     "vsifile Benchmarks": [
@@ -1330,6 +1330,44 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.0016051961574993106",
             "extra": "mean: 11.261582859999919 msec\nrounds: 50"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vincent.sarago@gmail.com",
+            "name": "Vincent Sarago",
+            "username": "vincentsarago"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cf7d1064e81874ae0fcff449a04d091ca423a5b7",
+          "message": "Merge pull request #28 from vincentsarago/feat/switch-to-httpx2\n\nfeat: switch to httpx2",
+          "timestamp": "2026-05-28T23:00:56+02:00",
+          "tree_id": "4e2b16dfcc3d3e9d25d7f2e580816927c17d74a3",
+          "url": "https://github.com/vincentsarago/vsifile/commit/cf7d1064e81874ae0fcff449a04d091ca423a5b7"
+        },
+        "date": 1780002121442,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "With VSIFILE Opener: False",
+            "value": 139.99329600105062,
+            "unit": "iter/sec",
+            "range": "stddev: 0.004288729723716",
+            "extra": "mean: 7.143199199999515 msec\nrounds: 50"
+          },
+          {
+            "name": "With VSIFILE Opener: True",
+            "value": 70.63415055001514,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0015579534419824083",
+            "extra": "mean: 14.15745772000065 msec\nrounds: 50"
           }
         ]
       }

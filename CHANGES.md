@@ -1,4 +1,9 @@
 
+# 0.6.0 (2026-05-28)
+
+* switch to `httpx2`
+* update Obstore requirements to `>=0.6,<0.9`
+
 # 0.5.1 (2026-01-27)
 
 * add python 3.14 support

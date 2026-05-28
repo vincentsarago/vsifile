@@ -4,7 +4,7 @@ import os
 from typing import Optional
 from urllib.parse import urlparse
 
-import httpx
+import httpx2 as httpx
 from attrs import define, field
 from obstore.store import S3Store
 

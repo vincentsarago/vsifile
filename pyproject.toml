@@ -23,10 +23,10 @@ dependencies = [
     "diskcache",
     "attrs",
     "cachetools",
-    "obstore>=0.5,<0.9",
+    "obstore>=0.8,<1.0",
     "pydantic",
     "pydantic-settings",
-    "httpx",
+    "httpx2",
 ]
 
 [dependency-groups]
@@ -35,6 +35,8 @@ dev = [
     "pytest-cov",
     "rangehttpserver",
     "rasterio>=1.4.0",
+    "IPython",
+    "jupyter",
     "pre-commit",
 ]
 
@@ -111,7 +113,9 @@ ignore = [
     "B008",  # do not perform function calls in argument defaults
     "B905",  # ignore zip() without an explicit strict= parameter, only support with python >3.10
 ]
-
+exclude = [
+    "*.ipynb"
+]
 
 [tool.bumpversion]
 current_version = "0.5.1"

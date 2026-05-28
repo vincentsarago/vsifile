@@ -17,12 +17,12 @@ from vsifile.settings import VSISettings
 
 if TYPE_CHECKING:
     from obstore.store import (
-        AzureConfigInput,
+        AzureConfig,
         ClientConfig,
-        GCSConfigInput,
+        GCSConfig,
         ObjectStore,
         RetryConfig,
-        S3ConfigInput,
+        S3Config,
     )
 
 vsi_settings = VSISettings()
@@ -54,7 +54,7 @@ class BaseReader(metaclass=abc.ABCMeta):
     name: str = field()
     mode: str = field(default="rb", validator=_check_mode)
 
-    config: S3ConfigInput | GCSConfigInput | AzureConfigInput | None = field(default=None)
+    config: S3Config | GCSConfig | AzureConfig | None = field(default=None)
     client_options: ClientConfig | None = field(default=None)
     retry_config: RetryConfig | None = field(default=None)
 
@@ -177,7 +177,7 @@ class BaseReader(metaclass=abc.ABCMeta):
         # TODO: maybe check if gdal is trying to make a bigger header request?
         loc = self.tell()
         if loc + length <= len(self.header):
-            logger.debug(f"VSIFILE: Reading {loc}->{loc+length} from Header cache")
+            logger.debug(f"VSIFILE: Reading {loc}->{loc + length} from Header cache")
             _ = self.seek(loc + length, 0)
             return self.header[loc : loc + length]
 
